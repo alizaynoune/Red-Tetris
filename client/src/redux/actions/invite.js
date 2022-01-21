@@ -6,7 +6,8 @@ import {
     INVITE_DECLINE,
     INVITE_REFRESH,
     INVITE_REMOVE_ALL,
-} from './types';
+    LOADING_INVITES,
+} from '../types';
 
 
 export const inviteRequest = (invite) => {
@@ -15,17 +16,19 @@ export const inviteRequest = (invite) => {
     //     state: 'waiting',
     // }
     return (dispatch) => {
+        dispatch({type: LOADING_INVITES});
         dispatch(success(invite, INVITE_REQUEST));
     }
 }
 
 export const refreshInvite = () => {
     return (dispatch) => {
+        dispatch({type: LOADING_INVITES});
         dispatch(success(null, INVITE_REFRESH));
     }
 }
 
-export const removeAll = () => {
+export const removeAllInvetes = () => {
     return {
         type: INVITE_REMOVE_ALL,
     }

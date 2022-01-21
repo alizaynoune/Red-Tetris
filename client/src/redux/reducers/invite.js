@@ -5,7 +5,8 @@ import {
     INVITE_DECLINE,
     INVITE_REFRESH,
     INVITE_REMOVE_ALL,
-} from '../actions/types';
+    LOADING_INVITES,
+} from '../types';
 
 const initialState = {
     isLoading: false,
@@ -24,7 +25,7 @@ const newInvite = (state, action) => {
     };
     const index = state.invites.findIndex(invite => invite.userId === data.userId);
     if (index === -1) {
-        state.invites.push(data);
+        state.invites.unshift(data);
         localStorage.setItem('invite', JSON.stringify(state));
         return {
             ...state,
@@ -74,12 +75,13 @@ const decline = (state, action) => {
     localStorage.setItem('invite', JSON.stringify(data));
 }
 
-const removeAll = (state, action) => {
+const removeAll = (state) => {
     const data = {
         ...state,
         invites: [],
     }
     localStorage.setItem('invite', JSON.stringify(data));
+    return data;
 }
 
 const refresh = () => {
@@ -98,6 +100,11 @@ const refresh = () => {
 
 export default function inviteReducer(state = initialState, action) {
     switch (action.type) {
+        case LOADING_INVITES:
+            return {
+                ...state,
+                isLoading: true,
+            }
         case INVITE_REQUEST:
             return newInvite(state, action);
         case INVITE_FAILURE:
@@ -113,7 +120,7 @@ export default function inviteReducer(state = initialState, action) {
         case INVITE_REFRESH:
             return refresh();
         case INVITE_REMOVE_ALL:
-            return removeAll(state, action);
+            return removeAll(state);
         default:
             return state;
     }

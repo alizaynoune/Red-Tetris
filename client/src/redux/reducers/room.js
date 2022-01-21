@@ -5,7 +5,7 @@ import {
     ROOM_REFRESH,
     ROOM_ERROR,
     ROOM_CLOSE,
-} from "../actions/types";
+} from "../types";
 
 const initialState = {
     isLoading: false,
@@ -20,7 +20,7 @@ const initialState = {
 };
 
 const createRoom = (state, action) => {
-    console.log(action.payload);
+    // console.log(action.payload);
     const user = {
         id: action.payload.user.id,
         name: action.payload.user.name,
@@ -31,7 +31,7 @@ const createRoom = (state, action) => {
         error: null,
         is_joined: true,
         isAdmin: true,
-        status: 'waiting',
+        status: action.payload.isPravite ? 'closed' : 'waiting',
         isPravite: action.payload.isPravite,
         id: action.payload.roomId,
         name: action.payload.roomName,
@@ -101,6 +101,7 @@ const deletRoom = (state, action) => {
 
 const refreshRoom = (state, action) => {
     const data = localStorage.getItem("room");
+    // console.log(data);
     if (data) {
         const room = JSON.parse(data);
         return {
