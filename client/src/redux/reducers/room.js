@@ -2,7 +2,6 @@ import {
     ROOM_CREATE,
     ROOM_JOIN,
     ROOM_LEAVE,
-    ROOM_REFRESH,
     ROOM_ERROR,
     ROOM_CLOSE,
 } from "../types";
@@ -13,10 +12,15 @@ const initialState = {
     is_joined: false,
     isPravite: false,
     isAdmin : false,
+    adminId: null,
     status: '',
     id: null,
     name: null,
-    users: [],
+    users: [
+        // userId: userId,
+        // userName: userName,
+        // joinedAt: joinedAt,
+    ],
 };
 
 const createRoom = (state, action) => {
@@ -37,7 +41,6 @@ const createRoom = (state, action) => {
         name: action.payload.roomName,
         users: [user],
     };
-    localStorage.setItem("room", JSON.stringify(data));
     return data;
 };
 
@@ -60,7 +63,6 @@ const pushUser = (state, action) => {
             status: action.payload.status,
             users: [...state.users, user],
         };
-        localStorage.setItem("room", JSON.stringify(data));
         return data;
     } else {
         return {
@@ -83,7 +85,6 @@ const deleteUser = (state, action) => {
             isLoading: false,
             users: users,
         };
-        localStorage.setItem("room", JSON.stringify(data));
         return data;
     } else {
         return {
@@ -91,26 +92,6 @@ const deleteUser = (state, action) => {
             isLoading: false,
             error: `${action.payload.userName} is not in the room`,
         };
-    }
-};
-
-const deletRoom = (state, action) => {
-    localStorage.removeItem("room");
-    return initialState;
-};
-
-const refreshRoom = (state, action) => {
-    const data = localStorage.getItem("room");
-    // console.log(data);
-    if (data) {
-        const room = JSON.parse(data);
-        return {
-            ...room,
-            isLoading: false,
-            error: null,
-        };
-    } else {
-        return initialState;
     }
 };
 
@@ -122,9 +103,7 @@ export default function roomReducer(state = initialState, action) {
         case ROOM_JOIN:
             return pushUser(state, action);
         case ROOM_LEAVE:
-            return deletRoom(state, action);
-        case ROOM_REFRESH:
-            return refreshRoom(state, action);
+            return initialState;
         case ROOM_CLOSE:
             return {
                 ...state,
