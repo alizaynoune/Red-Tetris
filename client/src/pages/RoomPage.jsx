@@ -1,8 +1,9 @@
 import React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 
-import { createStage } from '../helpers/StageHelper'
+// import { createStage } from '../helpers/StageHelper'
+import Stage from '../components/Stage'
 
 export const RoomPage = (props) => {
     // console.log(props);
@@ -10,8 +11,7 @@ export const RoomPage = (props) => {
     // console.log(room);
     return (
         <div>
-            <h1>Welcome {auth.name}  at Room page</h1>
-            <h1>{room.name}</h1>
+            <Stage />
         </div>
     )
 }

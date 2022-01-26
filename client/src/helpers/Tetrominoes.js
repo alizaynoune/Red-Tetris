@@ -1,62 +1,87 @@
 
-const Tetrominoes = {
+export const TETROMINOES = {
+    0: {
+        shape : [0],
+        color: "208, 211, 212",
+    },
     I: {
         shape : [
-            [0, 1, 0, 0],
-            [0, 1, 0, 0],
-            [0, 1, 0, 0],
-            [0, 1, 0, 0],
+            [0, 'I', 0, 0],
+            [0, 'I', 0, 0],
+            [0, 'I', 0, 0],
+            [0, 'I', 0, 0],
         ],
-        color: "cyan",
+        color: "80, 227, 230",
+        min_max_x: [1, 1],
+        min_max_y: [0, 3],
     },
     J: {
         shape : [
-            [0, 2, 0],
-            [0, 2, 0],
-            [2, 2, 0],
+            [0, 'J', 0],
+            [0, 'J', 0],
+            ['J', 'J', 0],
         ],
-        color: "blue",
+        color: "36, 95, 223",
+        min_max_x: [0, 1],
+        min_max_y: [0, 2],
     },
     L: {
         shape : [
-            [0, 3, 0],
-            [0, 3, 0],
-            [0, 3, 3],
+            [0, 'L', 0],
+            [0, 'L', 0],
+            [0, 'L', 'L'],
         ],
-        color: "orange",
+        color: "223, 173, 36",
+        min_max_x: [1, 2],
+        min_max_y: [0, 2],
     },
     O: {
         shape : [
-            [4, 4],
-            [4, 4],
+            ['O', 'O'],
+            ['O', 'O'],
         ],
-        color: "yellow",
+        color: "223, 217, 36",
+        min_max_x: [0, 1],
+        min_max_y: [0, 1],
     },
     S: {
         shape : [
-            [0, 5, 5],
-            [5, 5, 0],
+            [0, 'S', 'S'],
+            ['S', 'S', 0],
             [0, 0, 0],
         ],
-        color: "green",
+        color: "48, 211, 56",
+        min_max_x: [0, 2],
+        min_max_y: [0, 1],
     },
     T: {
         shape : [
-            [0, 6, 0],
-            [6, 6, 6],
             [0, 0, 0],
+            ['T', 'T', 'T'],
+            [0, 'T', 0],
         ],
-        color: "purple",
+        color: "132, 61, 198",
+        min_max_x: [0, 2],
+        min_max_y: [0, 1],
     },
     Z: {
         shape : [
-            [7, 7, 0],
-            [0, 7, 7],
+            ['Z', 'Z', 0],
+            [0, 'Z', 'Z'],
             [0, 0, 0],
         ],
-        color: "red",
+        color: "227, 78, 78",
+        min_max_x: [0, 2],
+        min_max_y: [0, 1],
+    },
+    D: {
+        shape : ['D'],
+        color: "0, 0, 0",
     },
 };
 
-
-export default Tetrominoes;
+export const randomTetromino = () => {
+    const tetrominoes = 'IJLOSTZ';
+    const randomTetromino = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+    return TETROMINOES[randomTetromino];
+}

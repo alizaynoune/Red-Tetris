@@ -3,7 +3,9 @@ import { connect } from 'react-redux';
 
 import Stage from '../components/Stage';
 
+
 const OnePlayerMode = (props) => {
+    // console.log(props, 'props');
     return (
         <Stage />
     )
