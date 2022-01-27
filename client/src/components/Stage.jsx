@@ -44,40 +44,40 @@ const Stage = (props) => {
         currentTetromino, updateCurrentTetromino,
         nextTetromino, updateNextTetromino,
         resetGame,
-        pushToStage,
-    ] = useStage(InitStage());
+        moveTetromino,
+    ] = useStage();
+
+    // useEffect(() => {
+    //     pushToStage(currentTetromino);
+    // }, [gameStart]);
 
     useEffect(() => {
-        pushToStage(currentTetromino);
-    }, [gameStart]);
-
-    useEffect(() => {
-        let stage = InitStage();
-        let next = randomTetromino();
-        props.createStage({ stage });
-        props.updateTetromino({ next });
+        // let stage = InitStage();
+        // let next = randomTetromino();
+        // // let current = randomTetromino();
+        // props.createStage({ stage });
+        // props.updateTetromino({ next });
+        // updateNextTetromino(randomTetromino());
         document.getElementById('Content').focus();
     }, []);
 
-    useEffect(() => {
-        updateCurrentTetromino(
-            {
-                pos: { x: 0, y: 5 },
-                tetromino: TETROMINOES[stage.tetromino.next],
-                collided: false,
-            });
-        updateNextTetromino(stage.tetromino.next);
-        updateStage(stage.stage);
-        updateScore(stage.score);
-    }, [props.stage]);
 
+    
 
     const updateTetromino = () => {
-        let next = randomTetromino();
-        props.updateTetromino({ next });
+        // let next = randomTetromino();
+        // const pos = TETROMINOES[nextTetromino].pos.map(
+        //     (index) => ([index[0], index[1] + 3])
+        // );
+        // console.log(pos);
+        // updateCurrentTetromino();
+        updateNextTetromino(randomTetromino());
+        // props.updateTetromino(randomTetromino());
     }
 
     const nextTetrominoShape = TETROMINOES[nextTetromino].shape.map(row => {
+        if (!row)
+            return ;
         return row.map((tetromino, key) => {
             return <TetrominoStyle
                 key={key}
@@ -87,6 +87,7 @@ const Stage = (props) => {
     });
 
     const header = () => {
+
         return (
             <div style={{
                 display: 'flex',
@@ -153,7 +154,9 @@ const Stage = (props) => {
                         type="primary"
                         onClick={() => {
                             startGame(true);
-                            updateTetromino();
+                            // updateTetromino();
+                            // moveTetromino({x: 0, y: 0});
+                            // console.log(currentTetromino);
                         }
                         }
                     >
@@ -179,18 +182,36 @@ const Stage = (props) => {
                         Pause
                     </Button>
                 ))}
-                <Button type="primary" >
+                <Button
+                type="primary"
+                onClick={() => {
+                    updateTetromino();
+                    }}
+                >
                     Leave
                 </Button>
             </div>
         )
     }
 
+    const handlekeys = (e) => {
+        console.log(e.keyCode);
+        if (!gameStart) return;
+        if (e.keyCode === 37) {
+            moveTetromino({ x: -1, y: 0 });
+        } else if (e.keyCode === 39) {
+            moveTetromino({ x: 1, y: 0 });
+        } else if (e.keyCode === 40) {
+            moveTetromino({ x: 0, y: 1 });
+        }
+        // else if (e.keyCode === 38) {
+        //     rotateTetromino();
+        // }
+    }
+
 
     return (
-        <Content id="Content" role="button" tabIndex="0" onKeyDown={(e) => {
-            console.log(e);
-        }}
+        <Content id="Content" role="button" tabIndex="0" onKeyDown={handlekeys}
             style={{
                 background: 'rgba(0, 0, 0, 0.7)',
                 padding: 0,
