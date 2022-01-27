@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Layout, Row, Col, Button, Popover } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
@@ -9,10 +9,20 @@ import {
     STAGE_WIDTH
 } from '../helpers/StageHelper';
 import { TETROMINOES, randomTetromino } from '../helpers/Tetrominoes';
-import { CellStyle } from './styles/CellStyle';
+import { TetrominoStyle } from './styles/TetrominoStyle';
 
 import Message from './Message';
 import Players from './Players';
+
+import {
+    createStage,
+    updateStage,
+    // updateCell,
+    updateTetromino,
+} from "../redux/actions";
+
+import { useStage } from "../hooks/Stage";
+
 
 
 const { Content } = Layout;
@@ -20,22 +30,61 @@ const { Content } = Layout;
 const Stage = (props) => {
 
 
-    const { room } = props;
+    const { room, stage } = props;
 
-    console.log(room, 'room');
+    const [
+        currentStage, updateStage,
+        dropRow, setDropRow,
+        score, updateScore,
+        rows, updateRows,
+        gameOver, updateGameOver,
+        gameWon, updateGameWon,
+        gameStart, startGame,
+        gamePause, pauseGame,
+        currentTetromino, updateCurrentTetromino,
+        nextTetromino, updateNextTetromino,
+        resetGame,
+        pushToStage,
+    ] = useStage(InitStage());
 
-    const stage = CreateStage(InitStage());
+    useEffect(() => {
+        pushToStage(currentTetromino);
+    }, [gameStart]);
 
-    const rendom = randomTetromino();
+    useEffect(() => {
+        let stage = InitStage();
+        let next = randomTetromino();
+        props.createStage({ stage });
+        props.updateTetromino({ next });
+        document.getElementById('Content').focus();
+    }, []);
 
-    const nextTetromino = rendom.shape.map(row => {
-        return row.map((cell, key) => {
-            return <CellStyle
+    useEffect(() => {
+        updateCurrentTetromino(
+            {
+                pos: { x: 0, y: 5 },
+                tetromino: TETROMINOES[stage.tetromino.next],
+                collided: false,
+            });
+        updateNextTetromino(stage.tetromino.next);
+        updateStage(stage.stage);
+        updateScore(stage.score);
+    }, [props.stage]);
+
+
+    const updateTetromino = () => {
+        let next = randomTetromino();
+        props.updateTetromino({ next });
+    }
+
+    const nextTetrominoShape = TETROMINOES[nextTetromino].shape.map(row => {
+        return row.map((tetromino, key) => {
+            return <TetrominoStyle
                 key={key}
-                type={cell}
-                color={TETROMINOES[cell].color} />
+                type={tetromino}
+                color={TETROMINOES[tetromino].color} />
         })
-    })
+    });
 
     const header = () => {
         return (
@@ -50,17 +99,17 @@ const Stage = (props) => {
             }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateRows: `repeat(${rendom.shape[0].length},
-                        calc(100% / ${rendom.shape[0].length}))`,
-                    gridTemplateColumns: `repeat(${rendom.shape.length}, 1fr)`,
+                    gridTemplateRows: `repeat(${TETROMINOES[nextTetromino].shape[0].length},
+                        calc(100% / ${TETROMINOES[nextTetromino].shape[0].length}))`,
+                    gridTemplateColumns: `repeat(${TETROMINOES[nextTetromino].shape.length}, 1fr)`,
                     gridGap: '1px',
-                    width: `calc(15px * ${rendom.shape.length})`,
+                    width: `calc(15px * ${TETROMINOES[nextTetromino].shape.length})`,
 
                 }} >
-                    {nextTetromino}
+                    {nextTetrominoShape}
                 </div>
-                <span>SCOR 120</span>
-                <span>LINES 2</span>
+                <span>{`SCORE ${score}`}</span>
+                <span>{`ROWS ${rows}`}</span>
             </div>
         )
     }
@@ -79,7 +128,7 @@ const Stage = (props) => {
                 margin: 'auto',
 
             }}>
-                {stage}
+                {CreateStage(currentStage)}
             </div>
         )
     }
@@ -87,20 +136,51 @@ const Stage = (props) => {
     const bouttons = () => {
         return (
             <div style={{
-                // padding: '10px',
                 display: 'flex',
                 justifyContent: 'space-between',
-                // background: 'grey',
-                // width: '100%',
             }}>
-                <Button type="primary" >
-                    Start
-                </Button>
+                {gameStart ? (
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            resetGame(randomTetromino());
+                        }}
+                    >
+                        Restart
+                    </Button>
+                ) : (
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            startGame(true);
+                            updateTetromino();
+                        }
+                        }
+                    >
+                        Start
+                    </Button>
+                )}
+                {gameStart && (gamePause ? (
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            pauseGame(false);
+                        }}
+                    >
+                        Resume
+                    </Button>
+                ) : (
+                    <Button
+                        type="primary"
+                        onClick={() => {
+                            pauseGame(true);
+                        }}
+                    >
+                        Pause
+                    </Button>
+                ))}
                 <Button type="primary" >
                     Leave
-                </Button>
-                <Button type="primary" >
-                    Invite
                 </Button>
             </div>
         )
@@ -108,15 +188,18 @@ const Stage = (props) => {
 
 
     return (
-        <Content style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            padding: 0,
-            margin: 0,
-            height: 'calc(100vh - 90px)',
-            paddingBottom: '30px',
-            marginTop: '-10px',
-            marginBottom: '-20px',
-        }}>
+        <Content id="Content" role="button" tabIndex="0" onKeyDown={(e) => {
+            console.log(e);
+        }}
+            style={{
+                background: 'rgba(0, 0, 0, 0.7)',
+                padding: 0,
+                margin: 0,
+                height: 'calc(100vh - 90px)',
+                paddingBottom: '30px',
+                marginTop: '-10px',
+                marginBottom: '-20px',
+            }}>
             <Row style={{
             }}>
                 <Col span={24}>
@@ -191,7 +274,12 @@ const mapStateToProps = (state) => {
     return {
         auth: state.auth,
         room: state.room,
+        stage: state.stage,
     }
 }
 
-export default connect(mapStateToProps, {})(Stage);
+export default connect(mapStateToProps, {
+    createStage,
+    updateStage,
+    updateTetromino,
+})(Stage);
