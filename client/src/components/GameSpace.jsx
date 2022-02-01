@@ -50,37 +50,56 @@ const GameSpace = (props) => {
         moveTetromino,
         rotateTetromino,
         updateDropTime,
+        gooleDrop,
     ] = useStage();
 
+
+    const changeFocused = () => {
+        document.getElementById('game-space').focus();
+    }
+
     useEffect(() => {
-        document.getElementById('Content').focus();
+        // document.getElementById('Content').focus();
+        changeFocused();
     }, []);
 
 
-    const handlekeys = (e) => {
-        console.log(e.keyCode);
-        const { keyCode } = e;
-        if (!gameStart) return;
-        if (!(
-            keyCode === 37 ||
-            keyCode === 39 ||
-            keyCode === 40 ||
-            // keyCode === 32 ||
-            keyCode === 38
-        )) return;
-        updateDropTime(null);
-        if (e.keyCode === 37) {
-            moveTetromino(currentStage, currentTetromino, { x: -1, y: 0 });
-        } else if (e.keyCode === 39) {
-            moveTetromino(currentStage, currentTetromino, { x: 1, y: 0 });
-        } else if (e.keyCode === 40) {
-            moveTetromino(currentStage, currentTetromino, { x: 0, y: 1 });
+    const handleKeyDown = ({ keyCode }) => {
+        // console.log(e.keyCode);
+        // const { keyCode } = e;
+        if (!gameStart && keyCode === 13) {
+            startGame();
         }
-        else if (e.keyCode === 38) {
+        if (!gameStart) return;
+        updateDropTime(null);
+        if (keyCode === 13) {
+            pauseGame(!gamePause);
+        }
+        if (keyCode === 37 || keyCode === 74) {
+            // move to left
+            moveTetromino(currentStage, currentTetromino, { x: -1, y: 0 });
+        } else if (keyCode === 39 || keyCode === 76) {
+            // move to right
+            moveTetromino(currentStage, currentTetromino, { x: 1, y: 0 });
+        } else if (keyCode === 40 || keyCode === 75) {
+            // move to down
+            moveTetromino(currentStage, currentTetromino, { x: 0, y: 1 });
+        } else if (keyCode === 32 || keyCode === 72) {
+            // move to goole drop
+            moveTetromino(currentStage, currentTetromino, { x: 0, y: -1 });
+        } else if (keyCode === 38 || keyCode === 73) {
+            // rotate
             rotateTetromino(currentStage, currentTetromino);
         }
 
-        updateDropTime(500);
+        // updateDropTime(500);
+    }
+
+    const handleKeyUp = (e) => {
+        console.log('key up');
+        if (gameStart && !gamePause && !gameWon && !gameOver) {
+            updateDropTime(500);
+        }
     }
 
     const handleAlertGameOver = () => {
@@ -90,6 +109,7 @@ const GameSpace = (props) => {
                 content: 'Game Over',
                 onOk() {
                     resetGame(randomTetromino());
+                    changeFocused();
                 },
             });
         }
@@ -100,6 +120,37 @@ const GameSpace = (props) => {
     useEffect(() => {
         handleAlertGameOver();
     }, [gameOver]);
+
+
+    const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+
+    const handleTouchEnd = ({ changedTouches }) => {
+        if (!gameStart) return;
+        console.log('starting');
+        const [touch] = changedTouches;
+        const { x, y } = touch;
+        const {clientX, clientY} = changedTouches[0];
+        const deltaX = clientX - touchStart.x;
+        const deltaY = clientY - touchStart.y;
+        console.log(deltaX, ' ' , deltaY);
+        if (deltaX === deltaY)
+            moveTetromino(currentStage, currentTetromino, {x: 0, y : -1})
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > 0) {
+                console.log('right');
+                moveTetromino(currentStage, currentTetromino, { x: 1, y: 0 });
+            } else {
+                moveTetromino(currentStage, currentTetromino, { x: -1, y: 0 });
+                console.log('left');
+            }
+        } else {
+            if (deltaY < 0) {
+                rotateTetromino(currentStage, currentTetromino);
+                console.log('rotate');
+            }
+        }
+        updateDropTime(500);
+    }
 
 
     const bottons = () => {
@@ -117,6 +168,7 @@ const GameSpace = (props) => {
                         gameStart ?
                             resetGame(randomTetromino())
                             : startGame();
+                        changeFocused();
                     }}
                 > {gameStart ? 'Reset' : 'Start'}
                 </Button>
@@ -126,6 +178,7 @@ const GameSpace = (props) => {
                         type="primary"
                         onClick={() => {
                             pauseGame(!gamePause);
+                            changeFocused();
                         }}
                     > {gamePause ? 'Resume' : 'Pause'}
                     </Button>
@@ -133,7 +186,8 @@ const GameSpace = (props) => {
                 <Button
                     type="primary"
                     onClick={() => {
-                        updateTetromino();
+                        // updateTetromino();
+                        changeFocused();
                     }}
                 > Leave </Button>
             </div>
@@ -144,10 +198,25 @@ const GameSpace = (props) => {
 
     return (
         <Content
-            id="Content"
+            id="game-space"
             role="button"
             tabIndex="0"
-            onKeyDown={(e) => handlekeys(e)}
+            onKeyDown={(e) => handleKeyDown(e)}
+            onKeyUp={(e) => handleKeyUp(e)}
+            onTouchStart={(e) => {
+                if (gameStart) updateDropTime(null);
+              setTouchStart({
+                  x: e.changedTouches[0].clientX,
+                  y: e.changedTouches[0].clientY,
+              })
+            }}
+            onTouchEnd={(e) => {
+                console.log(
+                    touchStart.x - e.changedTouches[0].clientX
+                );
+                handleTouchEnd(e);
+            }}
+            // onTouchStart={(e) => alert(`touch start ${e.touches[0].clientX}`)}
             style={{
                 background: 'rgba(0, 0, 0, 0.7)',
                 padding: 0,
