@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import socketio from 'socket.io-client';
+
 
 import { Form, Input, Button, message} from "antd";
 
 import { connect } from "react-redux";
 import { login } from "../redux/actions";
 
-
+// const io = socketio.connect('http://localhost:5000');
 const FormUserName = (props) => {
 
     const [input, setInput] = useState({
@@ -44,25 +46,14 @@ const FormUserName = (props) => {
             message.error(props.auth.error);
         }
     }, [props.auth.error]);
-   
-
 
     // useEffect(() => {
-    //     const { hash } = window.location;
-    //     if (hash){
-    //         const Regx = /(^#[\w\-]+\[[\w\-]+\]$)|(^#[\w\-]+$)/g
-    //         const match = hash.match(Regx);
-    //         console.log(hash, hash.match(Regx) );
-    //         !match && message.error(`Invalid hash-basd url`)
-    //     }
-        
-    // }, [window.location.hash])
+    //     console.log(socketio, 'socketio');
 
-
-
+    // }, [io]);
 
     return (
-        <Form
+        <Form size="large"
             style={{
                 width: '100%',
                 display: 'flex',
@@ -77,7 +68,7 @@ const FormUserName = (props) => {
             onSubmit={handleSubmit}
             >
             
-            <Input.Group size="large"
+            <Input.Group compact
                 style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -88,9 +79,6 @@ const FormUserName = (props) => {
                     style={{
                         width: 'calc(100% - 90px)',
                         maxWidth: '40vh',
-                        display: 'inline-block',
-                        pading: '0px',
-                        margin: '0px',
                     }}
                     help={input.error ? input.errorMessage : ''}
                     hasFeedback
@@ -100,27 +88,24 @@ const FormUserName = (props) => {
                         onChange={handleChange}
                         placeholder="Enter your name" 
                         name="username"
+                        autoFocus
                     />
                 </Form.Item>
-                <Form.Item>
                     <Button
                         htmlType="submit"
                         type="primary"
                         className="login-form-button"
                         style={{
-                            width: '90px',
-                            display: 'inline-block',
                             background:'#6FCF97',
                             color: '#fff',
 
                         }}
-                        size="large"
                         onClick={handleSubmit}
                         disabled={input.error || input.value.length < 3 || props.auth.isLoading}
+                        loading={props.auth.isLoading}
                         >
                         Create
                     </Button>
-                </Form.Item>
             </Input.Group>
         </Form>
     );

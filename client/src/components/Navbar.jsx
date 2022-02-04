@@ -10,41 +10,13 @@ import { Affix, Dropdown, Menu } from "antd";
 import { connect } from "react-redux";
 // actions
 import {
-    logout,
     leaveRoom,
     removeAllInvetes,
 } from '../redux/actions'
 
-
 const NavbarComponent = (props) => {
 
     const { auth, room } = props;
-
-    const LogOut = () => {
-        props.leaveRoom(auth.id);
-        props.removeAllInvetes();
-        props.logout();
-    }
-
-
-    const menu = (
-        <Menu>
-            <Menu.Item key={"logout"} onClick={LogOut} >
-                <span>logout</span>
-            </Menu.Item>
-        </Menu>
-    );
-
-    const userName = (
-        <Dropdown overlay={menu} >
-            <div style={{
-                cursor: "pointer",
-            }}>
-                {auth.name}
-            </div>
-        </Dropdown>
-    )
-
 
     return (
         <Affix>
@@ -64,7 +36,7 @@ const NavbarComponent = (props) => {
                         <img src={logM} alt="logo" className='d-none d-sm-block'  />
                     </LogoMobile>
                     <NotifDiv>
-                        <h3  className="d-none d-sm-block" > {userName} </h3>
+                        <h3  className="d-none d-sm-block" > {auth.name} </h3>
                         <NotifComponent />
                     </NotifDiv>
                     </>
@@ -83,6 +55,5 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps, {
     leaveRoom,
-    logout,
     removeAllInvetes
 })(NavbarComponent);

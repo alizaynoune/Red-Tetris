@@ -61,12 +61,10 @@ const HomePage = (props) => {
     hashBased();
   }, []);
 
-
-
-
   return (
     <Layout style={{
-      background: "none",
+      // background: "none",
+      background: "rgba(0, 0, 0, 0.6)",
       width: "100vw",
       height: "100vh",
       padding: 0,
@@ -92,70 +90,11 @@ const HomePage = (props) => {
             <Page404 />
             : !auth.isAuth ? <FormUserName /> : !room.is_joined ?
               <FormRoomName />
-              // : !room.isPravite && room.status === "waiting" ?
-              //   <InviteUsers />
+              : !room.isPravite && room.status === "waiting" ?
+                <InviteUsers />
                 : <GameSpace />
           }
         </Content>
-        {/* {showSider &&
-          <Sider theme="dark"
-            trigger={null}
-            // collapsible
-            collapsed={collapsed}
-            breakpoint={
-              "sm"
-            }
-            collapsedWidth={25}
-            // sm={0} md={0}
-            style={{
-              background: '#404040',
-              position: "absolute",
-              top: "50px",
-              right: "0px",
-              height: "calc(100vh - 90px)",
-              padding: 0,
-            }}
-          >
-            <div style={{
-              height: "100%",
-              display: "grid",
-              gridTemplateColumns: "25px auto",
-
-            }}>
-              <div style={{
-                height: "100%",
-              }} >
-                <h4 style={{
-                  height: '25px',
-                  width: 'calc(100vh - 90px)',
-                  position: "relative",
-                  right: -26,
-                  textAlign: "center",
-                  // top: "",
-                  letterSpacing: "10px",
-                  fontWeight: "bold",
-                  transformOrigin: "0 0",
-                  transform: "rotate(90deg)",
-                  cursor: "pointer",
-                }}
-                onClick={() => setCollapsed(!collapsed)}
-                >
-                  {siderName}
-                </h4>
-              </div>
-
-              <Menu theme="dark" style={{
-                height: "100%",
-                background: "none",
-                margin: 0,
-                padding: 0,
-
-              }}>
-                {siderContent}
-              </Menu>
-            </div> 
-              </Sider> 
-        }*/}
       </Layout>
       <Footer style={{
         background: 'none',
