@@ -1,39 +1,38 @@
-import { io } from "socket.io-client";
-import axios from "axios";
-
-// const ENDPOINT = process.env.REACT_APP_IO_ENDPOINT || "http://localhost:5000";
-const ENDPOINT = "http://localhost:5000";
-
-const socket = (event, data) => {
+const socket = (manager, event, data) => {
   return new Promise((resolve, reject) => {
-    const manager = io(ENDPOINT);
-    manager.on("timeout", () => {
-      return reject("timeout");
-    });
-    manager.on("connect_error", (error) => {
-      console.log("connect_error", error);
-      manager.close();
-      return reject(error.message);
-    });
-    manager.on("connect_failed", (error) => {
-      console.log(error, "failed");
-      manager.close();
-      return reject(error.message);
-    });
-    manager.on("error", (error) => {
-      console.log(error, "error");
-      manager.close();
-      return reject(error.message);
-    });
-
-    manager.on("connect", () => {
-      manager.emit(event, data, (res, err) => {
-        console.log(res, err, "reserro");
+    let io = manager.socket("/");
+    console.log(`socket ${io.connected}`);
+    if (!io.connected) {
+      console.log("socket not connected", io.io);
+      io.connect((err) => {
+        console.log("socket connect", err);
         if (err) {
+          console.log("err", err);
           return reject(err.message);
         }
-        return resolve(res);
       });
+    }
+    // io.on("connect", () => {
+      io.emit(event, data, (res, err) => {
+        if (err) {
+          console.log("err", err);
+          return reject(err.message);
+        }
+        console.log(`socket ${event}, ${data}`, res);
+        resolve(res);
+      });
+    io.on("error", (err) => {
+      console.log("error", err);
+      reject(err.message);
+    });
+    io.on("connect_error", (err) => {
+      console.log("connect_error", err);
+      reject(err.message);
+    });
+    io.on("connect_failed", (err) => {
+      console.log("connect_failed", err);
+      io.close();
+      reject(err.message);
     });
   });
 };

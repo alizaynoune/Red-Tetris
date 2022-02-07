@@ -1,57 +1,65 @@
+import socket from "../../socket/Socket";
 import {
-    ROOM_CREATE,
-    ROOM_JOIN,
-    ROOM_LEAVE,
-    ROOM_ERROR,
-    ROOM_CLOSE,
-} from '../types';
-
+  ROOM_CREATE,
+  ROOM_JOIN,
+  ROOM_LEAVE,
+  ROOM_ERROR,
+  ROOM_UPDATE_STATUS,
+  LOADING_ROOM,
+} from "../types";
 
 export const createRoom = (room) => {
-    return async (dispatch) => {
-        dispatch(success(room, ROOM_CREATE));
+  // console.log(room);
+  return async (dispatch, getState) => {
+    dispatch({ type: LOADING_ROOM });
+    try {
+      const io = getState().socket.socket;
+      const res = await socket(io, "roomCreate", room);
+      console.log(res, "resRoom");
+      dispatch(success(res, ROOM_CREATE));
+    } catch (err) {
+      console.log(err, 'roomCreateerror');
+      dispatch(error(err, ROOM_ERROR));
     }
-}
+  };
+};
 
 export const joinRoom = (room) => {
-    return async (dispatch) => {
-        dispatch(success(room, ROOM_JOIN));
-    }
-}
+  return async (dispatch) => {
+    dispatch(success(room, ROOM_JOIN));
+  };
+};
 
 export const leaveRoom = (userId) => {
-    return (dispatch) => {
-        dispatch(success({userId}, ROOM_LEAVE));
-    }
-}
+  return (dispatch) => {
+    dispatch(success({ userId }, ROOM_LEAVE));
+  };
+};
 
 export const closeRoom = (room) => {
-    return (dispatch) => {
-        const data = {
-            ...room,
-            status: 'closed',
-        };
-        if (room.status === 'waiting'){
-            room.isAdmin ? dispatch(success(data, ROOM_CLOSE)) :
-            dispatch(error("You are not admin", ROOM_ERROR));
-        }
-        else
-            dispatch(error('room error'), ROOM_ERROR);
+  return async (dispatch, getState) => {
+    console.log(room, "roomclose");
+    try {
+      const io = getState().socket.socket;
+      const res = await socket(io, "closeRoom", room);
+      dispatch(success(res, ROOM_UPDATE_STATUS));
+    } catch (error) {
+      console.log(error, "roomcloseerror");
+      dispatch(error(error, ROOM_ERROR));
     }
-}
-
-
+  };
+};
 
 const success = (data, type) => {
-    return {
-        type: type,
-        payload: data
-    }
-}
+  return {
+    type: type,
+    payload: data,
+  };
+};
 
 const error = (data, type) => {
-    return {
-        type: type,
-        payload: data
-    }
-}
+  return {
+    type: type,
+    payload: data,
+  };
+};

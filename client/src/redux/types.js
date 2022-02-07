@@ -4,9 +4,7 @@ export const IS_LOADING = 'IS_LOADING';
 // Auth actions
 export const LOADING_USER = 'LOADING_USER';
 export const SUCESS_LOGIN = 'SUCESS_LOGIN';
-export const SUCESS_LOGOUT = 'SUCESS_LOGOUT';
 export const FAIL_LOGIN = 'FAIL_LOGIN';
-export const FAIL_LOGOUT = 'FAIL_LOGOUT';
 
 
 // Notifications actions
@@ -21,7 +19,7 @@ export const SUCESS_RECEIVE_MESSAGE = 'SUCESS_RECEIVE_MESSAGE';
 
 
 // Room actions
-export const LOADING_ROOMS = 'LOADING_ROOMS';
+export const LOADING_ROOM = 'LOADING_ROOMS';
 export const ROOM_REFRESH = "ROOM_REFRESH";
 export const ROOM_CREATE = 'ROOM_CREATE';
 export const ROOM_JOIN = 'ROOM_JOIN';
@@ -29,6 +27,7 @@ export const ROOM_LEAVE = 'ROOM_LEAVE';
 export const ROOM_ERROR = 'ROOM_ERROR';
 export const ROOM_CLOSE = 'ROOM_CLOSE';
 export const ROOM_CLEAR_ERROR = 'ROOM_CLEAR_ERROR';
+export const ROOM_UPDATE_STATUS = 'ROOM_UPDATE_STATUS';
 
 // Notification actions
 export const NOTIFICATION_RECEIVE = 'NOTIFICATION_RECEIVE';
@@ -55,6 +54,8 @@ export const INVITE_REMOVE_ALL = 'INVITE_REMOVE_ALL';
 // Online User actions
 export const LOADING_ONLINE_USERS = 'LOADING_ONLINE_USERS';
 export const CURRENT_ONLINE_USERS = 'CURRENT_ONLINE_USERS';
+export const ONLINE_USERS_ERROR = 'ONLINE_USERS_ERROR';
+export const ONLINE_USERS_UPDATE = 'ONLINE_USERS_UPDATE';
 
 // Stage actions
 export const STAGE_CREATE = 'STAGE_CREATE';
@@ -62,6 +63,11 @@ export const STAGE_UPDATE = 'STAGE_UPDATE';
 
 // updateTetromino actions
 export const TETROMINOES_UPDATE = 'TETROMINOES_UPDATE';
+
+// socket actions
+export const SOCKET_CONNECT = 'SOCKET_CONNECT';
+export const SOCKET_ERROR = 'SOCKET_ERROR';
+export const LOADING_SOCKET = 'LOADING_SOCKET';
 
 
 

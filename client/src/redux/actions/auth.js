@@ -1,20 +1,19 @@
 import socket from "../../socket/Socket";
-import { SUCESS_LOGIN, SUCESS_LOGOUT, IS_LOADING, FAIL_LOGIN } from "../types";
+import { SUCESS_LOGIN, LOADING_USER, FAIL_LOGIN } from "../types";
 
 export const login = (user) => {
-  return async (dispatch) => {
-    dispatch({ type: IS_LOADING });
+  return async (dispatch, getState) => {
+    dispatch({ type: LOADING_USER });
     try {
-      const res = await socket("login", user);
-      console.log(res);
+      const io = getState().socket.socket;
+      const res = await socket(io, "login", user);
       dispatch(success(res, SUCESS_LOGIN));
-    }
-    catch (err) {
+    } catch (err) {
+      console.log(err);
       dispatch(error(err, FAIL_LOGIN));
     }
   };
 };
-
 
 const success = (data, type) => {
   return {
@@ -23,9 +22,9 @@ const success = (data, type) => {
   };
 };
 
-const error = (data, type) => {
+const error = (message, type) => {
   return {
     type: type,
-    payload: data,
+    payload: message,
   };
 };

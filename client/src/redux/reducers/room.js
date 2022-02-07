@@ -3,18 +3,19 @@ import {
     ROOM_JOIN,
     ROOM_LEAVE,
     ROOM_ERROR,
-    ROOM_CLOSE,
+    ROOM_UPDATE_STATUS,
+    LOADING_ROOM,
 } from "../types";
 
 const initialState = {
     isLoading: false,
     error: null,
-    is_joined: false,
+    // isJoned: false,
     isPravite: false,
-    isAdmin : false,
-    adminId: null,
+    // isAdmin : false,
+    admin: null,
     status: '',
-    id: null,
+    // id: null,
     name: null,
     users: [
         // userId: userId,
@@ -24,22 +25,15 @@ const initialState = {
 };
 
 const createRoom = (state, action) => {
-    // console.log(action.payload);
-    const user = {
-        id: action.payload.user.id,
-        name: action.payload.user.name,
-    };
     const data = {
         ...state,
         isLoading: false,
         error: null,
-        is_joined: true,
-        isAdmin: true,
-        status: action.payload.status || 'waiting',
+        admin: action.payload.admin,
+        status: action.payload.status,
         isPravite: action.payload.isPravite,
-        id: action.payload.roomId,
-        name: action.payload.roomName,
-        users: [user],
+        name: action.payload.name,
+        users: [action.payload.users],
     };
     return data;
 };
@@ -55,8 +49,8 @@ const pushUser = (state, action) => {
             ...state,
             isLoading: false,
             error: null,
-            is_joined: true,
-            isAdmin: false,
+            // isJoned: true,
+            // isAdmin: false,
             isPravite: action.payload.isPravite,
             id: action.payload.roomId,
             name: action.payload.roomName,
@@ -73,43 +67,27 @@ const pushUser = (state, action) => {
     }
 };
 
-// const deleteUser = (state, action) => {
-//     // modef it to delete user from room
-//     // console.log(action.payload);
-//     const index = state.users.findIndex(user => user.id === action.payload.userId);
-//     if (index !== -1) {
-//         const users = [...state.users];
-//         users.splice(index, 1);
-//         const data = {
-//             ...state,
-//             isLoading: false,
-//             users: users,
-//         };
-//         return data;
-//     } else {
-//         return {
-//             ...state,
-//             isLoading: false,
-//             error: `${action.payload.userName} is not in the room`,
-//         };
-//     }
-// };
-
 
 export default function roomReducer(state = initialState, action) {
     switch (action.type) {
+        case LOADING_ROOM:
+            return {
+                ...state,
+                isLoading: true,
+                error: null,
+            };
         case ROOM_CREATE:
             return createRoom(state, action);
         case ROOM_JOIN:
             return pushUser(state, action);
         case ROOM_LEAVE:
             return initialState;
-        case ROOM_CLOSE:
+        case ROOM_UPDATE_STATUS:
             return {
                 ...state,
                 isLoading: false,
                 error: null,
-                status: 'closed',
+                status: action.payload.status,
             };
         case ROOM_ERROR:
             return {
