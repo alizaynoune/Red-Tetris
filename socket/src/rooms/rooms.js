@@ -12,16 +12,21 @@ class Rooms {
     return this.rooms;
   };
 
-  getRoom = (name) => {
+  getRoomUsers = (id) => {
     return new Promise((resolve, reject) => {
-      let trimName = name.trim().toLowerCase();
-      if (!this.regx.test(trimName)) {
-        return reject({ message: "Name is invalid" });
+      const room = this.rooms.find((room) => room.id === id);
+      if (room) {
+        return resolve(room.users);
       }
-      let existingRoom = this.rooms.find((room) => room.name === trimName);
-      if (existingRoom) {
-        return resolve(existingRoom);
-      }
+      return reject({ message: "Room not found" });
+    });
+  };
+
+  getRoom = (id) => {
+    return new Promise((resolve, reject) => {
+      let index = this.rooms.findIndex((room) => room.id === id);
+      if (index !== -1)
+        return resolve(this.rooms[index]);
       return reject({ message: "Room not found" });
     });
   };
@@ -42,11 +47,34 @@ class Rooms {
         name: trimName,
         isPravite: data.isPravite,
         admin: userId,
+        id: userId,
         status: "waiting",
         users: [userId],
+        invit: [],
       };
       this.rooms.push(room);
       return resolve(room);
+    });
+  };
+
+  inviteUser = (data) => {
+    return new Promise((resolve, reject) => {
+      let index = this.rooms.findIndex((room) => room.id === data.roomId);
+      if (index !== -1) {
+        let room = {
+          ...this.rooms[index],
+          invit: [...this.rooms[index].invit,
+          {
+            userId: data.userId,
+            userName: data.userName,
+            status: 'wating',
+            // read: false,
+          }]
+        };
+        this.rooms[index] = room;
+        return resolve(room);
+      }
+      return reject({ message: "Room not found" });
     });
   };
 
@@ -64,41 +92,34 @@ class Rooms {
     });
   };
 
-  closeRoom = (roomName, userId) => {
+  closeRoom = (roomId, userId) => {
     return new Promise((resolve, reject) => {
-      let trimName = roomName.trim().toLowerCase();
-      if (!this.regx.test(trimName))
-        return reject({ message: "Room name is invalid" });
-      let indexRoom = this.rooms.findIndex((room) => room.name === trimName);
-      if (indexRoom === -1) return reject({ message: "Room not found" });
-      let user = this.rooms[indexRoom].users.find((user) => user === userId);
-      if (!user) return reject({ message: "User is not joined" });
-      this.rooms[indexRoom].status = "closed";
-      return resolve(this.rooms[indexRoom]);
+      let roomIndex = this.rooms.findIndex((room) => room.id === roomId);
+      if (roomIndex === -1) return reject({ message: "Room not found" });
+      if (this.rooms[roomIndex].admin !== userId)
+        return reject({ message: "You are not admin" });
+      this.rooms[roomIndex].status = "closed";
+      return resolve(this.rooms[roomIndex]);
     });
   };
 
-  leaveRoom = (userId, roomName) => {
+  leaveRoom = (userId, roomId) => {
     return new Promise((resolve, reject) => {
-      let indexRoom = this.rooms.findIndex((room) => room.name === roomName);
-      if (indexRoom === -1) return reject({ message: "Room not found" });
-      let indexuser = this.rooms[indexRoom].users.findIndex(
-        (user) => user === userId
-      );
-      if (indexuser === -1) return reject({ message: "User is not joined" });
-      this.rooms[indexRoom].users.splice(indexuser, 1);
-      if (this.rooms[indexRoom].users.length === 0)
-          this.rooms.splice(indexRoom, 1);
-      return resolve();
+      let roomIndex = this.rooms.findIndex((room) => room.id === roomId);
+      if (roomIndex === -1) return reject({ message: "Room not found" });
+      console.log(this.rooms[roomIndex], userId);
+      let userIndex = this.rooms[roomIndex].users.findIndex((user) => user === userId);
+      if (userIndex === -1) return reject({ message: "User is not joined" });
+      this.rooms[roomIndex].users.splice(userIndex, 1);
+      return resolve(this.rooms[roomIndex]);
     });
   };
 
   deleteRoom = (id) => {
     return new Promise((resolve, reject) => {
-      let existingRoom = this.rooms.find((room) => room.id === id);
-      if (!existingRoom) return reject({ message: "Room not found" });
-      let index = this.rooms.findIndex((room) => room.id === id);
-      this.rooms.splice(index, 1);
+      let roomIndex = this.rooms.findIndex((room) => room.id === id);
+      if (roomIndex === -1) return reject({ message: "Room not found" });
+      this.rooms.splice(roomIndex, 1);
       return resolve(this.rooms);
     });
   };

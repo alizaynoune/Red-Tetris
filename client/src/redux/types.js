@@ -5,6 +5,7 @@ export const IS_LOADING = 'IS_LOADING';
 export const LOADING_USER = 'LOADING_USER';
 export const SUCESS_LOGIN = 'SUCESS_LOGIN';
 export const FAIL_LOGIN = 'FAIL_LOGIN';
+export const UPDATE_USER = 'UPDATE_USER';
 
 
 // Notifications actions
@@ -68,6 +69,13 @@ export const TETROMINOES_UPDATE = 'TETROMINOES_UPDATE';
 export const SOCKET_CONNECT = 'SOCKET_CONNECT';
 export const SOCKET_ERROR = 'SOCKET_ERROR';
 export const LOADING_SOCKET = 'LOADING_SOCKET';
+
+
+// Rooms actions
+
+export const ROOMS_REFRESH = 'ROOMS_REFRESH';
+export const ROOMS_ERROR = 'ROOMS_ERROR';
+export const ROOMS_LOADING = 'ROOMS_LOADING';
 
 
 

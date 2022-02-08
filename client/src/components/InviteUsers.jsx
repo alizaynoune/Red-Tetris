@@ -9,6 +9,7 @@ import {
   onlineUsers,
   closeRoom,
   onlineUsersUpdate,
+  leaveRoom,
 } from "../redux/actions";
 
 const { Meta } = Card;
@@ -54,17 +55,23 @@ const InviteUsers = (props) => {
           ...input,
           error: true,
         });
+    if (input.error || !input.id) return;
+    // console.log(input.id, props.room.id, "input.value");
+    props.inviteRequest({
+      userId: input.id,
+      roomId: props.room.id
+    });
   };
 
   // listen for changes in the invite error
   useEffect(() => {
     if (props.invite.error) {
+      // roomId, userId
       message.error(props.invite.error);
     }
   }, [props.invite.error]);
 
   useEffect(() => {
-    // console.log(props.socket, 'props.socket');
     props.socket.socket("/").on("updateUsers", (data) => {
       console.log(data, "updateUsers");
       props.onlineUsersUpdate(data);
@@ -77,6 +84,7 @@ const InviteUsers = (props) => {
   }, []);
 
   const handleSelect = (id) => {
+    console.log(id, "id");
     const value = dataSource.filter((item) => item.id === id);
     setInput({
       ...input,
@@ -101,9 +109,7 @@ const InviteUsers = (props) => {
   const options = dataSource.map((item) => {
     return (
       item.id !== props.auth.id && (
-        <Option key={item.id} value={item.id}
-        disabled={item.isJoned}
-        >
+        <Option key={item.id} value={item.id} disabled={item.isJoned}>
           {item.value}
           <span
             style={{
@@ -130,7 +136,6 @@ const InviteUsers = (props) => {
       >
         <Form.Item
           name="inviteUsers"
-          // onBlur={() => props.onlineUsers()}
           help={input.error ? props.invite.error : ""}
           validateStatus={
             input.error ? "error" : input.value.length > 2 ? "success" : ""
@@ -224,6 +229,7 @@ const InviteUsers = (props) => {
       type="inner"
       actions={[
         <Button
+          onClick={() => props.leaveRoom()}
           type="primary"
           style={{
             display: "flex",
@@ -235,7 +241,7 @@ const InviteUsers = (props) => {
         </Button>,
         <Button
           type="primary"
-          onClick={() => props.closeRoom(props.room.name)}
+          onClick={() => props.closeRoom(props.room.id)}
           style={{
             display: "flex",
             margin: "auto",
@@ -323,4 +329,5 @@ export default connect(mapStateToProps, {
   onlineUsers,
   closeRoom,
   onlineUsersUpdate,
+  leaveRoom,
 })(InviteUsers);

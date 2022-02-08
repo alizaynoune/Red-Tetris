@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import logD from "../img/logo.svg";
 import logM from "../img/logoMobile.svg";
 
@@ -9,14 +9,28 @@ import { Affix, Dropdown, Menu } from "antd";
 
 import { connect } from "react-redux";
 // actions
-import {
-    leaveRoom,
-    removeAllInvetes,
-} from '../redux/actions'
+// import {
+//     leaveRoom,
+//     removeAllInvetes,
+// } from '../redux/actions'
 
 const NavbarComponent = (props) => {
 
     const { auth, room } = props;
+
+    // useEffect(() => {
+    //     console.log("props updatedwww");
+    //     if (props.socket){
+    //         props.socket.socket("/").on("updateProfile", (data) => {
+    //             console.log(data, "updateProfile");
+    //         });
+    //         return () => {
+    //             props.socket.socket("/").off("updateUsers");
+    //         }
+    //     }
+    // }, [props.socket, props.room, props.auth]);
+
+
 
     return (
         <Affix>
@@ -49,11 +63,12 @@ const NavbarComponent = (props) => {
 const mapStateToProps = (state) => {
     return {
         room: state.room,
-        auth: state.auth
+        auth: state.auth,
+        socket: state.socket.socket,
     }
 }
 
 export default connect(mapStateToProps, {
-    leaveRoom,
-    removeAllInvetes
+    // leaveRoom,
+    // removeAllInvetes
 })(NavbarComponent);
