@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, message, Checkbox } from "antd";
+import { Form, Input, Button, message, Checkbox, Modal } from "antd";
 import { connect } from "react-redux";
-import { createRoom } from "../redux/actions";
+import { createRoom, createOrJoinRoom } from "../redux/actions";
 
 const FormRoomName = (props) => {
   const [input, setInput] = useState({
@@ -11,7 +11,6 @@ const FormRoomName = (props) => {
   });
 
   const [checked, setChecked] = useState(false);
-
   const handleChange = (e) => {
     setInput({
       ...input,
@@ -25,7 +24,7 @@ const FormRoomName = (props) => {
     const data = {
       roomName: input.value,
       isPravite: !checked,
-      userId: props.auth.id,
+      userId: props.profile.id,
     };
     input.value.length > 2
       ? setInput({
@@ -43,7 +42,23 @@ const FormRoomName = (props) => {
 
   useEffect(() => {
     if (props.room.error) {
-      message.error(props.room.error);
+      if (props.room.error === "Room is already exists do you want to join") {
+        Modal.confirm({
+          title: props.room.error,
+          cancelText: "No",
+          okText: "Yes",
+          onOk() {
+            let data = {
+              roomName: input.value,
+              isPravite: !checked,
+              userId: props.profile.id,
+            };
+            props.createOrJoinRoom(data);
+            console.log("click ok");
+          },
+          onCancel() {},
+        });
+      } else message.error(props.room.error);
     }
   }, [props.room.error]);
 
@@ -136,11 +151,14 @@ const FormRoomName = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    auth: state.auth,
+    profile: state.profile,
     room: state.room,
   };
 };
 
-const RoomName = connect(mapStateToProps, { createRoom })(FormRoomName);
+const RoomName = connect(mapStateToProps, {
+  createRoom,
+  createOrJoinRoom,
+})(FormRoomName);
 
 export default RoomName;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 
-import { Form, Input, Button, message, Card, Select } from "antd";
+import { Form, Input, Button, message, Card, Select, Tabs } from "antd";
 
 import { gold, red } from "@ant-design/colors";
 import {
@@ -14,11 +14,14 @@ import {
 
 const { Meta } = Card;
 const { Option } = Select;
+const { TabPane } = Tabs;
 
 const InviteUsers = (props) => {
-  // console.log(props, 'props2');
+  // //console.log(props, 'props2');
 
   const [dataSource, setDataSource] = useState([]);
+  const [inveted, setInveted] = useState([]);
+  const [usersRoom, setUsersRoom] = useState([]);
   const [input, setInput] = useState({
     value: "",
     id: null,
@@ -33,14 +36,15 @@ const InviteUsers = (props) => {
   };
   // listen for changes in the online users
   useEffect(() => {
-    console.log(props.users, "props.users");
     const data = props.users.online.map((user) => {
       return {
         value: user.name,
         id: user.id,
-        isJoned: user.isJoned,
+        isJoined: user.isJoined,
+        inveted: false,
       };
     });
+    // //console.log(data, "data");
     setDataSource(data);
   }, [props.users]);
 
@@ -56,35 +60,63 @@ const InviteUsers = (props) => {
           error: true,
         });
     if (input.error || !input.id) return;
-    // console.log(input.id, props.room.id, "input.value");
+    // //console.log(input.id, props.room.id, "input.value");
     props.inviteRequest({
       userId: input.id,
-      roomId: props.room.id
+      roomId: props.room.id,
     });
+    setInput({
+      ...input,
+      value: "",
+      id: null,
+    });
+    // setInveted([...inveted, input.id]);
   };
 
-  // listen for changes in the invite error
   useEffect(() => {
-    if (props.invite.error) {
-      // roomId, userId
-      message.error(props.invite.error);
-    }
+    props.invite.error && message.error(props.invite.error);
   }, [props.invite.error]);
 
   useEffect(() => {
+    setUsersRoom(props.room.users);
+    setInveted(props.room.invit);
+  }, [props.room]);
+
+  useEffect(() => {
+    const data = dataSource.map((user) => {
+      return {
+        ...user,
+        inveted: props.room.invit.find(
+          (invited) => invited.userId === user.id
+        )
+          ? true
+          : false,
+      };
+    });
+
+    setDataSource(data);
+    setInveted(props.room.invit);
+  }, [props.room.invit]);
+
+  useEffect(() => {
+    props.room.error && message.error(props.room.error);
+  }, [props.room.error]);
+
+  useEffect(() => {
     props.socket.socket("/").on("updateUsers", (data) => {
-      console.log(data, "updateUsers");
+      //console.log(data, "updateUsers");
       props.onlineUsersUpdate(data);
     });
+
     props.onlineUsers();
 
     return () => {
       props.socket.socket("/").off("updateUsers");
+      // props.socket.socket("/").off("userJoind");
     };
   }, []);
 
   const handleSelect = (id) => {
-    console.log(id, "id");
     const value = dataSource.filter((item) => item.id === id);
     setInput({
       ...input,
@@ -108,8 +140,9 @@ const InviteUsers = (props) => {
 
   const options = dataSource.map((item) => {
     return (
-      item.id !== props.auth.id && (
-        <Option key={item.id} value={item.id} disabled={item.isJoned}>
+      item.id !== props.profile.id &&
+      !item.inveted && (
+        <Option key={item.id} value={item.id} disabled={item.isJoined}>
           {item.value}
           <span
             style={{
@@ -119,7 +152,7 @@ const InviteUsers = (props) => {
               position: "absolute",
               right: "20px",
             }}
-          >{`Status: ${item.isJoned ? "is Joind" : "is Free"}`}</span>
+          >{`Status: ${item.isJoined ? "is Joind" : "is Free"}`}</span>
         </Option>
       )
     );
@@ -176,51 +209,86 @@ const InviteUsers = (props) => {
     </Form>
   );
 
-  const inviteList = props.invite.invites.map((invite, index) => {
-    return (
-      <div
-        key={index}
-        style={{
-          width: "100%",
-          display: "inline-block",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignItems: "center",
-          flex: 2,
-          backgroundColor: index % 2 === 0 ? "#fafafa" : "#f0f0f0",
-        }}
-      >
+  const inviteList = () => {
+    return inveted.map((invite, index) => {
+      return (
         <div
+          key={index}
           style={{
             width: "100%",
-            display: "flex",
+            display: "inline-block",
             flexWrap: "wrap",
-            justifyContent: "space-around",
+            justifyContent: "center",
             alignItems: "center",
-            flex: 2,
+            // flex: 2,
+            backgroundColor: index % 2 === 0 ? "#fafafa" : "#f0f0f0",
           }}
         >
-          <span>{invite.userId}</span>
-          <span>{invite.userName}</span>
-          <span
+          <div
             style={{
-              color:
-                invite.status === "accepted"
-                  ? "#6FCF97"
-                  : invite.status === "waiting"
-                  ? gold.primary
-                  : red[4],
-              padding: "5px",
-              borderRadius: "5px",
-              margin: "5px",
+              width: "100%",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-around",
+              alignItems: "center",
+              flex: 2,
             }}
           >
-            {invite.status.charAt(0).toUpperCase() + invite.status.slice(1)}
-          </span>
+            <span>{invite.userId}</span>
+            <span>{invite.userName}</span>
+            <span
+              style={{
+                color:
+                  invite.status === "accepted"
+                    ? "#6FCF97"
+                    : invite.status === "waiting"
+                    ? gold.primary
+                    : red[4],
+                padding: "5px",
+                borderRadius: "5px",
+                margin: "5px",
+              }}
+            >
+              {invite.status.charAt(0).toUpperCase() + invite.status.slice(1)}
+            </span>
+          </div>
         </div>
-      </div>
-    );
-  });
+      );
+    });
+  };
+
+  const UsersInRoom = () => {
+    return usersRoom.map((user, key) => {
+      return (
+        <div
+          key={key}
+          style={{
+            width: "100%",
+            display: "inline-block",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "10px",
+            backgroundColor: key % 2 === 0 ? "#fafafa" : "#f0f0f0",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-around",
+              alignItems: "center",
+              flex: 2,
+            }}
+          >
+            <span>{user.id}</span>
+            <span>{user.name}</span>
+          </div>
+        </div>
+      );
+    });
+  };
 
   return (
     <Card
@@ -255,61 +323,121 @@ const InviteUsers = (props) => {
         justifyContent: "center",
       }}
     >
-      <div
-        style={{
-          margin: 0,
-          padding: 0,
-          // height: '100%',
-          width: "100%",
-          display: "inline-block",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignItems: "center",
-          borderRadius: "5px",
-          boxShadow: "0px 0px 5px #d9d9d9",
-          maxHeight: "60vh",
-          overflowY: "auto",
-        }}
-      >
-        <Meta
-          type="inner"
-          title={
-            <div
+      {/* Tabs Start */}
+      <Tabs defaultActiveKey="1">
+        <TabPane tab="Users inveted" key="1" type="card">
+          <div
+            style={{
+              margin: 0,
+              padding: 0,
+              width: "100%",
+              display: "inline-block",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "5px",
+              boxShadow: "0px 0px 5px #d9d9d9",
+              maxHeight: "60vh",
+              overflowY: "auto",
+            }}
+          >
+            <Meta
+              type="inner"
+              title={
+                <div
+                  style={{
+                    width: "100%",
+                    display: "inline-block",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                    paddingTop: "5px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-around",
+                      alignItems: "center",
+                      padding: 0,
+                      margin: 0,
+                    }}
+                  >
+                    <p>UserId</p>
+                    <p>Name</p>
+                    <p>Status</p>
+                  </div>
+                </div>
+              }
               style={{
+                backgroundColor: "#f0f0f0",
+                padding: 0,
+                margin: 0,
                 width: "100%",
-                display: "inline-block",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                paddingTop: "5px",
               }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  padding: 0,
-                  margin: 0,
-                }}
-              >
-                <p>UserId</p>
-                <p>Name</p>
-                <p>Status</p>
-              </div>
-            </div>
-          }
-          style={{
-            backgroundColor: "#f0f0f0",
-            padding: 0,
-            margin: 0,
-            width: "100%",
-          }}
-        />
-        {inviteList}
-      </div>
+            />
+            {inviteList()}
+          </div>
+        </TabPane>
+        <TabPane tab="Users joind" key="2">
+          <div
+            style={{
+              margin: 0,
+              padding: 0,
+              width: "100%",
+              display: "inline-block",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "5px",
+              boxShadow: "0px 0px 5px #d9d9d9",
+              maxHeight: "60vh",
+              overflowY: "auto",
+            }}
+          >
+            <Meta
+              type="inner"
+              title={
+                <div
+                  style={{
+                    width: "100%",
+                    display: "inline-block",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                    paddingTop: "5px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-around",
+                      alignItems: "center",
+                      padding: 0,
+                      margin: 0,
+                    }}
+                  >
+                    <p>UserId</p>
+                    <p>Name</p>
+                  </div>
+                </div>
+              }
+              style={{
+                backgroundColor: "#f0f0f0",
+                padding: 0,
+                margin: 0,
+                width: "100%",
+              }}
+            />
+            {UsersInRoom()}
+          </div>
+        </TabPane>
+        {/* Tabs End */}
+      </Tabs>
     </Card>
   );
 };
@@ -317,8 +445,8 @@ const InviteUsers = (props) => {
 const mapStateToProps = (state) => {
   return {
     room: state.room,
-    auth: state.auth,
-    invite: state.invite,
+    profile: state.profile,
+    invite: state.invitation,
     users: state.users,
     socket: state.socket.socket,
   };

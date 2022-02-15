@@ -19,7 +19,7 @@ class Users {
       if (existingUser) {
         return reject("Username is already taken");
       }
-      const user = { id, name: trimNmae, isJoned: false };
+      const user = { id, name: trimNmae, isJoined: false };
       this.users.push(user);
       return resolve(user);
     });
@@ -31,7 +31,7 @@ class Users {
 
   removeUser = (id) => {
     const index = this.users.findIndex((user) => user.id === id);
-    console.log(this.users[index]);
+    //console.log(this.users[index]);
     if (index !== -1) {
       return this.users.splice(index, 1)[0];
     }

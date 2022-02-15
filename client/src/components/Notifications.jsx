@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Menu, Badge, Popover } from "antd";
+import { Menu, Badge, Popover, notification, message } from "antd";
 import { BellOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 
 import "./styles/NotificationsStyled.css";
+
+import { pushNotification, changeStatusInvite } from "../redux/actions";
 
 const { SubMenu } = Menu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -11,86 +13,75 @@ const NotifComponent = (props) => {
   // don't forget to create a new action of newNotification
   // push notification to the user
 
-  const testnotif = [
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-    {
-      title: "New message from John Doe",
-      time: "3 minutes ago",
-      read: false,
-    },
-  ];
-  const [notifs, setNotifs] = useState(testnotif);
+  const [notifs, setNotifs] = useState([]);
+  const [contNotifs, setContNotifs] = useState(0);
 
   const handnotif = (e) => {
-    const id = parseInt(e.key.split("-")[1]);
-    const newNotifs = notifs.map((notif, key) => {
+    let split = e.key.split("-");
+    const id = parseInt(split[1]);
+    // const id = split[1];
+    const action = split[0];
+    // //console.log(action, id , '-------------------');
+    notifs.forEach((notif, key) => {
       if (id === key) {
-        notif.read = true;
+        props.changeStatusInvite({
+          event: action + "Invitation",
+          roomId: notif.roomId,
+          notifId: notif.id,
+        });
       }
       return notif;
     });
-    setNotifs(newNotifs);
+    // setNotifs(newNotifs);
   };
 
-  const lenght = notifs.filter((notif) => notif.read === false).length;
+  useEffect(() => {
+    if (!notifs.length) return;
+    let cont = notifs.filter((notif) => notif.read === false).length;
+    setContNotifs(cont);
+  }, [notifs]);
+
+  useEffect(() => {
+    //console.log('-- props profile notif--', props.profile.notif)
+    setNotifs(props.profile.notif);
+  }, [props.profile.notif]);
+
+  // useEffect(() => {}, [])
+
+  //   id: "832NhjV0cGTWFo3-AAAJ"
+  // name: "dasfdas"
+  // read: false
+  // roomId: "832NhjV0cGTWFo3-AAAJ"
+  // roomName: "das"
 
   useEffect(() => {
     if (props.socket.socket) {
       props.socket.socket.socket("/").on("notification", (data) => {
-        console.log(data, "notification");
+        //console.log("notification", data);
+        notification.info({
+          message: "New notification",
+          description: data.message,
+        });
+        props.pushNotification(data);
       });
+      // props.socket.socket.socket("/").on("updateRoom", data => {
+      //   console.log('update => ', data);
+      // })
       return () => {
         props.socket.socket.socket("/").off("notification");
       };
     }
   }, [props.socket]);
 
-  const mapnotifs = notifs.map((notif, key) => {
-    return !notif.read ? (
-      <SubMenu
-        key={`notif-${key}`}
-        expandIcon
-        title={<p style={{}}>{notif.title}</p>}
-      >
+  useEffect(() => {
+    //console.log(props.notifications);
+    props.notifications.error && message.error(props.notifications.error);
+  }, [props.notifications.error]);
+
+  const mapnotifs = notifs.map((item, key) => {
+    // //console.log(item, "item");
+    return item.type === "invitation" && !item.read ? (
+      <SubMenu key={`notif-${key}`} title={item.message}>
         <MenuItemGroup className="ulNotif">
           <Menu.Item
             key={`accept-${key}`}
@@ -112,7 +103,7 @@ const NotifComponent = (props) => {
             Accept
           </Menu.Item>
           <Menu.Item
-            key={`cancel-${key}`}
+            key={`decline-${key}`}
             className="ant-btn ant-btn-primary ant-btn-dangerous"
             onClick={handnotif}
             style={{
@@ -126,21 +117,17 @@ const NotifComponent = (props) => {
               border: "none",
             }}
           >
-            Cancel
+            Decline
           </Menu.Item>
         </MenuItemGroup>
       </SubMenu>
     ) : (
-      <Menu.Item key={`notif-${key}`} disabled>
-        <div style={{ height: 30 }}>
-          <div>
-            <p>{notif.title}</p>
-            <span style={{ fontSize: "12px", color: "#8c8c8c" }}>
-              {notif.time}
-            </span>
-          </div>
-        </div>
-      </Menu.Item>
+      <SubMenu
+        disabled={true}
+        expandIcon
+        key={`notif-${key}`}
+        title={item.message}
+      />
     );
   });
 
@@ -175,7 +162,7 @@ const NotifComponent = (props) => {
       }}
     >
       <Popover
-        content={menu}
+        content={notifs.length ? menu : null}
         trigger="click"
         placement="bottomRight"
         overlayClassName="notif-popover"
@@ -187,7 +174,7 @@ const NotifComponent = (props) => {
         }
       >
         <Badge
-          count={lenght}
+          count={contNotifs}
           showZero
           className="site-badge-count-109"
           style={{
@@ -210,9 +197,13 @@ const NotifComponent = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    auth: state.auth,
+    profile: state.profile,
     socket: state.socket,
+    notifications: state.notifications,
   };
 };
 
-export default connect(mapStateToProps, {})(NotifComponent);
+export default connect(mapStateToProps, {
+  pushNotification,
+  changeStatusInvite,
+})(NotifComponent);

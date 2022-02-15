@@ -1,136 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
 
-
-import { Button, Input } from 'antd';
-import { SendOutlined } from '@ant-design/icons'
-import moment from 'moment'
-
+import { Button, Input, message, Form } from "antd";
+import { RestFilled, SendOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 import {
-    BoxMessage,
-    MessageContent,
-    MessageUserName,
-    MessageText,
-    MessageCreatedAt
-} from './styles/BoxMessage';
+  BoxMessage,
+  MessageContent,
+  MessageUserName,
+  MessageText,
+  MessageCreatedAt,
+} from "./styles/BoxMessage";
 
+import { sentMessage, receiveMessage, clearMessages } from "../redux/actions";
 const Message = (props) => {
-    console.log('Message');
-
-    const fackeMessage = () => {
-        const message = [];
-        for (let i = 0; i < 20; i++) {
-            let id = Math.floor(Math.random() * 10);
-            message.push({
-                userId: id,
-                userName: 'user' + id,
-                message: "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam, architecto!",
-                createdAt: moment().format()
-            })
-        }
-        return message;
-    }
-
-    const { auth } = props;
-    const [input, setInput] = useState({
-        value: '',
-        error: false
-    })
-
-    const [messages, setMessages] = useState(fackeMessage());
-
-    const handleChange = (e) => {
-        setInput({
-            ...input,
-            value: e.target.value
-        })
-        console.log(input.value);
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // console.log(moment().format());
-        const newMessage = {
-            userId: auth.id,
-            userName: auth.name,
-            message: input.value,
-            createdAt: moment().format()
-        }
-        setMessages([...messages, newMessage])
-        setInput({
-            value: '',
-            error: false
-        })
-    }
-
-    // scrool to bottom wheres new message
-    useEffect(() => {
-        const chat = document.getElementById('chatBox');
-        chat.scrollTop = chat.scrollHeight;
-    }, [messages])
-    
+  const { profile } = props;
+  const [form] = Form.useForm();
+  const [inputError, setInputError] = useState(false);
+  const [messages, setMessages] = useState([]);
 
 
-    const MessageSide = () => {
-        console.log(messages);
-        return (
-            <BoxMessage id='chatBox'>
-                {messages?.map((item, id) => {
-                    return (
-                        <MessageContent
-                            key={id}
-                            userId={item.userId}
-                            authId={auth.id}>
-                            <MessageUserName
-                                userId={item.userId}
-                                authId={auth.id}>
-                                <span>{item.userId === auth.id ? 'You' : item.userName}</span>
-                            </MessageUserName>
-                            <MessageText
-                                userId={item.userId}
-                                authId={auth.id}>
-                                <span>{item.message}</span>
-                            </MessageText>
-                            <MessageCreatedAt
-                                userId={item.userId}
-                                authId={auth.id}>
-                                <span>{moment(item.createdAt).fromNow()}</span>
-                            </MessageCreatedAt>
-                        </MessageContent>
 
-                    )
-                }
-                )}
-            </BoxMessage>
-        )
-    }
+  const handleSubmit = (e) => {
+    const newMessage = {
+      roomId: props.room.id,
+      ...e,
+    };
+    props.sentMessage(newMessage);
+    form.resetFields();
+  };
 
+  useEffect(() => {
+    props.clearMessages();
+    props.socket.socket("/").on("message", (data) => {
+      props.receiveMessage(data);
+      console.log(data);
+    });
+    return () => {
+      props.socket.socket("/").off("message");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (props.messenger.error) message.error(props.messenger.error);
+    setMessages(props.messenger.messages);
+    console.log("messenger", props.messenger);
+  }, [props.messenger]);
+
+  // scrool to bottom wheres new message
+  useEffect(() => {
+    const chat = document.getElementById("chatBox");
+    chat.scrollTop = chat.scrollHeight;
+  }, [messages]);
+
+  const MessageSide = () => {
+    console.log(messages);
     return (
-        <>
-            {MessageSide()}
-            <Input.Group compact>
-                <Input style={{
-                    width: 'calc(100% - 60px)',
-                    margin: 'auto'
-                }}
-                    onPressEnter={handleSubmit}
-                    onChange={handleChange}
-                    value={input.value}
-                />
-                <Button type="primary" onClick={handleSubmit}>
-                    <SendOutlined />
-                </Button>
-            </Input.Group>
-        </>
-    )
+      <BoxMessage
+        id="chatBox"
+        style={{
+          height: "calc(100vh - 320px)",
+        }}
+      >
+        {messages.map((item, id) => {
+          return (
+            <MessageContent
+              key={id}
+              userId={item.userId}
+              profileId={profile.id}
+            >
+              <MessageUserName userId={item.userId} profileId={profile.id}>
+                <span>
+                  {item.userId === profile.id ? "You" : item.userName}
+                </span>
+              </MessageUserName>
+              <MessageText userId={item.userId} profileId={profile.id}>
+                <span>{item.message}</span>
+              </MessageText>
+              <MessageCreatedAt userId={item.userId} profileId={profile.id}>
+                <span>{moment(item.createdAt).fromNow()}</span>
+              </MessageCreatedAt>
+            </MessageContent>
+          );
+        })}
+      </BoxMessage>
+    );
+  };
+
+  return (
+    <>
+      {MessageSide()}
+      <Form onFinish={handleSubmit}
+      form={form}
+      >
+       <Form.Item
+          name="message"
+         rules={[
+          () => ({
+            validator(_, value) {
+              if (!value || value.trim().length < 3) {
+                setInputError(true);
+                return Promise.reject(new Error('Please enter  at least 3 characters long!'));
+              }
+              setInputError(false);
+              return Promise.resolve();
+            },
+          })
+         ]}
+      >
+          <Input
+            allowClear={true}
+            style={{
+              padding: 0,
+            }}
+            suffix={
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={inputError}
+                loading={props.messenger.loading}
+              >
+                <SendOutlined />
+              </Button>
+            }
+          />
+      </Form.Item>
+      </Form>
+    </>
+  );
 };
 
 const mapStateToProps = (state) => {
-    return {
-        auth: state.auth,
-        room: state.room
-    }
-}
+  return {
+    profile: state.profile,
+    room: state.room,
+    messenger: state.message,
+    socket: state.socket.socket,
+  };
+};
 
-export default connect(mapStateToProps, {})(Message);
+export default connect(mapStateToProps, {
+  sentMessage,
+  receiveMessage,
+  clearMessages,
+})(Message);

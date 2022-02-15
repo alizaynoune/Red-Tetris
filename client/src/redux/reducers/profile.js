@@ -1,24 +1,26 @@
-import { SUCESS_LOGIN, LOADING_USER, FAIL_LOGIN, UPDATE_USER } from "../types";
+
+import {
+  SUCESS_LOGIN,
+  LOADING_USER,
+  FAIL_LOGIN,
+  UPDATE_PROFILE,
+  NOTIFICATION_PUSH,
+  NOTIFICATION_REFRESH,
+
+} from "../types";
 
 const initialState = {
   isLoading: false,
   isAuth: false,
   error: null,
-  isJoned: false,
+  isJoined: false,
   id: null,
   name: null,
   room: null,
+  notif: [],
 };
 
-// id: "WhDk4XTSWUC47pv6AAAD"
-// ​
-// isJoned: false
-// ​
-// name: "dsafff"
-// ​
-// room: null
-
-export default function authReducer(state = initialState, action) {
+export default function profileReducer(state = initialState, action) {
   switch (action.type) {
     case LOADING_USER:
       return {
@@ -42,18 +44,29 @@ export default function authReducer(state = initialState, action) {
         isAuth: false,
         error: action.payload,
       };
-    case UPDATE_USER:
-      console.log(action.payload, 'action.payload>>>>>>>>>>>>');
+    case UPDATE_PROFILE:
       return {
         ...state,
         isLoading: false,
         isAuth: true,
-        id: action.payload.id,
-        name: action.payload.name,
-        isJoned: action.payload.isJoned,
-        room: action.payload.room,
         error: null,
+        ...action.payload,
       };
+      case NOTIFICATION_PUSH:
+        return {
+          ...state,
+          isLoading: false,
+          error: null,
+          notif: [...state.notif, action.payload]
+        }
+
+      case NOTIFICATION_REFRESH:
+        return {
+          ...state,
+          isLoading: false,
+          error: null,
+          notif: action.payload,
+        }
 
     default:
       return state;
