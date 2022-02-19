@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-import { Layout, Row, Col, Button, Popover, Modal, message } from "antd";
+import { Layout, Row, Col, Button, Spin, Modal, message } from "antd";
 import {
-  SettingOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
 } from "@ant-design/icons";
-import { TETROMINOES, randomTetromino } from "../helpers/Tetrominoes";
+import { TETROMINOES } from "../helpers/Tetrominoes";
 
 import Message from "./Message";
 import Players from "./Players";
@@ -23,24 +22,24 @@ import {
   refreshRoom,
   changeStatusRoom,
   gameActions,
+  continueGame,
+  gameClear,
+  clearPlayers,
 } from "../redux/actions";
 
-import { useStage } from "../hooks/useStage";
+// import { useStage } from "../hooks/useStage";
 
 import { useInterval } from "../hooks/useInterval";
 
 const { Content, Sider } = Layout;
 
 const GameSpace = (props) => {
-  console.log("GameSpace props", props);
-  // const { room } = props;
   const [collapsedChat, setCollapsedChat] = useState(true);
   const [triggerChat, setTriggerChat] = useState(true);
   const [triggerPlayers, setTriggerPlayers] = useState(true);
   const [collapsedPlayers, setCollapsedPlayers] = useState(true);
-  const [userStage, setUserStage] = useState(null);
+  const [userStage, setUserStage] = useState([]);
   const [dailyDrop, setDailyDrop] = useState(null);
-  // daily
   const [scor, setScor] = useState(0);
   const [rows, setRows] = useState(0);
   const [nextTetromino, setNextTetromino] = useState(0);
@@ -49,30 +48,61 @@ const GameSpace = (props) => {
   const [gameWon, setGameWon] = useState(false);
   const [gamePause, setGamePause] = useState(false);
 
+  const restGame = () => {
+    setDailyDrop(null);
+    setScor(0);
+    setRows(0);
+    setGameStart(false);
+    setGameOver(false);
+    setGameWon(false);
+    setGamePause(false);
+  };
+
   useEffect(() => {
-    // console.log("test", userStage);
+    // props.gameClear();
+    changeFocused();
+    restGame();
+    
+    // props.socket.socket('/').on('updatePlayers', data => {
+    //   // //console.log('updateplayer', data);
+    //   props.updatePlayers(data);
+    // })
+    return () => {
+      Modal.destroyAll();
+      // props.socket.socket('/').off('updatePlayers');
+    }
+
+
+  }, []);
+
+  useEffect(() => {
+    if (props.game.error) {
+      setDailyDrop(null);
+      message.error(props.game.error);
+      return;
+    }
     setUserStage(props.game.map);
     setScor(props.game.scor);
     setRows(props.game.rows);
-    // console.log(
-    //   "next",
-    //   TETROMINOES[props.game.nextTetrominos],
-    //   props.game.nextTetrominos
-    // );
-
-    setNextTetromino(props.game.nextTetrominos[0] || 0);
-    if (props.game.status === 'gameOver') setGameOver(true);
+    setNextTetromino(props.game.nextTetrominos[0]);
+    if (props.game.status === "gameOver") setGameOver(true);
+    else if (props.game.status === "gameWinner") setGameWon(true);
+    //console.log(props.game.status);
   }, [props.game]);
 
   useEffect(() => {
     if (props.room.error) message.error(props.room.error);
     else {
-      if (props.room.status === 'started'){
-        setGameStart(true)
+      if (props.room.status === "closed") restGame();
+      if (props.room.status === "end") setGameStart(false);
+      if (props.room.status === "started") {
+        // //console.log('game start');
+        setGameStart(true);
         setGamePause(false);
       }
-      if (props.room.status === 'paused') setGamePause(true);
+      if (props.room.status === "paused") setGamePause(true);
     }
+    // //console.log("nextTetromino =>", props.game.nextTetrominos);
   }, [props.room]);
 
   const changeFocused = () => {
@@ -88,23 +118,34 @@ const GameSpace = (props) => {
   }, dailyDrop);
 
   useEffect(() => {
-    // console.log("gameStart", gameStart);
-    if (gameStart && !gamePause && !gameWon && !gameOver) setDailyDrop(500);
-    else setDailyDrop(null);
+    if (gameStart && !gamePause && !gameWon && !gameOver){
+      setDailyDrop(500);
+      // //console.log('set daily drop');
+    }
+    else{
+      //console.log(gameStart, gamePause, gameWon, gameOver);
+      // //console.log('cleate daily drop');
+      setDailyDrop(null);
+    }
   }, [gameStart, gamePause, gameWon, gameOver]);
 
-  useEffect(() => {
-    changeFocused();
-  }, []);
+ 
 
   const handleKeyDown = ({ keyCode }) => {
     if (!gameStart && keyCode === 13) {
-      // startGame();
+      props.changeStatusRoom({
+        roomId: props.room.id,
+        status: "started",
+      });
     }
     if (!gameStart) return;
     setDailyDrop(null);
     if (keyCode === 13) {
       // pauseGame(!gamePause);
+      props.changeStatusRoom({
+        roomId: props.room.id,
+        status: gamePause ? "started" : "paused",
+      });
       setGamePause(!gamePause);
     }
     let data = {
@@ -143,33 +184,48 @@ const GameSpace = (props) => {
   };
 
   const handleKeyUp = (e) => {
-    console.log("key up");
+    // //console.log("key up");
     if (gameStart && !gamePause && !gameWon && !gameOver) setDailyDrop(500);
     // if (gameStart && !gamePause && !gameWon && !gameOver) {
     //   updateDropTime(500);
     // }
   };
 
-  const handleLiveRoom = () => {
-    //console.log("handleLiveRoom");
-  };
+  // const restState = () => {
+  //   setGameOver(false);
+  //   setGamePause(false);
+  //   setGameWon(false);
+  //   setGameStart(false);
+  // }
+
+  // useEffect(() =>{
+  //   //console.log('players update >>>>>>>>>>>kdjsljds');
+  // }, [props.players])
 
   useEffect(() => {
-    // console.log("GameSpace useEffect", gameOver, gameWon, resetGame);
     const modal = () => {
       Modal.confirm({
         width: "500px",
         title: gameOver ? "Game Over" : "Game Won",
-        content: gameOver ? "You lose!" : "You win!",
+        content: (
+          <>
+            {gameOver ? "You lose!" : "You are Winner"}
+            {props.room.admin !== props.profile.id && (
+              <p>
+                You will leave automata after admin restart this room
+              </p>
+            )}
+          </>
+        ),
         onOk() {
-          // resetGame(randomTetromino());
-          changeFocused();
+          props.gameClear();
+          props.continueGame({ roomId: props.room.id });
         },
         onCancel() {
-          handleLiveRoom();
+          props.leaveRoom();
         },
         okText: "Continue",
-        cancelText: "Live Room",
+        cancelText: "Leave Room",
         cancelButtonProps: {
           type: "danger",
         },
@@ -194,25 +250,25 @@ const GameSpace = (props) => {
   // const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
   // const handleTouchEnd = ({ changedTouches }) => {
   //   if (!gameStart) return;
-  //   //console.log("starting");
+  //   ////console.log("starting");
   //   const { clientX, clientY } = changedTouches[0];
   //   const deltaX = clientX - touchStart.x;
   //   const deltaY = clientY - touchStart.y;
-  //   //console.log(deltaX, " ", deltaY);
+  //   ////console.log(deltaX, " ", deltaY);
   //   if (deltaX === deltaY)
   //     moveTetromino(currentStage, currentTetromino, { x: 0, y: -1 });
   //   if (Math.abs(deltaX) > Math.abs(deltaY)) {
   //     if (deltaX > 0) {
-  //       //console.log("right");
+  //       ////console.log("right");
   //       moveTetromino(currentStage, currentTetromino, { x: 1, y: 0 });
   //     } else {
   //       moveTetromino(currentStage, currentTetromino, { x: -1, y: 0 });
-  //       //console.log("left");
+  //       ////console.log("left");
   //     }
   //   } else {
   //     if (deltaY < 0) {
   //       rotateTetromino(currentStage, currentTetromino);
-  //       //console.log("rotate");
+  //       ////console.log("rotate");
   //     }
   //   }
   //   // updateDropTime(500);
@@ -238,14 +294,14 @@ const GameSpace = (props) => {
                   roomId: props.room.id,
                   status: "started",
                 });
-              // gameStart ? console.log("reset Game") : setGameStart(true);
+              // gameStart ? //console.log("reset Game") : setGameStart(true);
               changeFocused();
             }}
           >
             {gameStart ? "Reset" : "Start"}
           </Button>
         )}
-        { props.profile.id === props.room.admin  && gameStart && (
+        {props.profile.id === props.room.admin && gameStart && !gameOver && !gameWon && (
           <Button
             type="primary"
             disabled={!props.room.admin === props.profile.id}
@@ -260,13 +316,16 @@ const GameSpace = (props) => {
           >
             {gamePause ? "Resume" : "Pause"}
           </Button>
-        )}
+        ) }
+        {/* {(gameWon || gameOver) && (
+          <Spin />
+        )} */}
         {props.room.isPravite && (
           <Button
             type="primary"
             hidden={gameStart}
             onClick={() => {
-              console.log("swithcroom");
+              //console.log("swithcroom");
             }}
           >
             chnage room to public
@@ -371,7 +430,16 @@ const GameSpace = (props) => {
               width: "100%",
             }}
           >
-            <Stage stage={props.game.map} />
+            <Spin
+            spinning={gameOver || gameWon}
+            tip={props.profile.id !== props.room.admin ? "Waiting admin close this room" : null}
+            style={{
+              color: 'black',
+              fontSize: 20,
+            }}
+            >
+            <Stage stage={userStage} />
+            </Spin>
             {bottons()}
           </Col>
         </Row>
@@ -382,8 +450,7 @@ const GameSpace = (props) => {
         breakpoint="lg"
         reverseArrow={true}
         collapsed={collapsedChat}
-        onCollapse={(collapsed, type) => {
-          console.log(collapsed, type);
+        onCollapse={collapsed => {
           setCollapsedChat(collapsed);
           window.innerWidth <= 350 && setTriggerPlayers(collapsed);
         }}
@@ -418,6 +485,7 @@ const mapStateToProps = (state) => {
     room: state.room,
     socket: state.socket.socket,
     game: state.game,
+    players: state.players,
   };
 };
 
@@ -430,4 +498,7 @@ export default connect(mapStateToProps, {
   refreshRoom,
   changeStatusRoom,
   gameActions,
+  continueGame,
+  gameClear,
+  clearPlayers,
 })(GameSpace);

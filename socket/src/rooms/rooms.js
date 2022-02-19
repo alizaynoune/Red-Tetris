@@ -1,6 +1,6 @@
 // const { TETROMINOES } = require('../../../client/src/helpers/Tetrominoes');
 const StageHelper = require('../utils/stage')
-const {TetrominoesClass, TETROMINOES}= require('../utils/tetrominoes')
+const { TetrominoesClass, TETROMINOES } = require('../utils/tetrominoes')
 class Rooms {
   constructor() {
     if (Rooms.instance instanceof Rooms) {
@@ -57,14 +57,14 @@ class Rooms {
     let user = {
       id,
       name,
-      status: null, // winer or loser
+      status: null, // winer, loser, continue 
       scor: 0,
       rows: 0,
       map: this.stage.initStage(),
       nextTetrominos: [nextTetrominos],
       currentTetromino: {
         position: { x: 0, y: 0 },
-        shapeIndex: 0,
+        shape: 0,
         shadow: { x: 0, y: 0 },
         collided: false,
       }
@@ -73,7 +73,6 @@ class Rooms {
   }
 
   createRoom = (data, user) => {
-    // console.log(StageHelper.STAGE_WIDTH);
     return new Promise((resolve, reject) => {
       let trimName = data.roomName.trim().toLowerCase();
       if (!this.regx.test(trimName)) {
@@ -98,6 +97,7 @@ class Rooms {
         isPravite: data.isPravite,
         status: data.isPravite ? "closed" : "waiting",
         nextTetromino,
+        ids: [user.id],
         users: [this.newUser(user.id, user.name, nextTetromino)],
         invit: [],
       };
@@ -109,30 +109,31 @@ class Rooms {
   NextTetromino = (roomIndex) => {
     let nextTetromino = this.tetromino.randomTetromino();
     this.rooms[roomIndex].nextTetrominos = nextTetromino;
-    this.rooms[roomIndex].users.forEach(e => {
-      e.nextTetrominos.push(nextTetromino);
+    this.rooms[roomIndex].users.forEach(u => {
+      u.nextTetrominos.push(nextTetromino);
     })
-
   }
 
   changeCurrentTetromino = (userIndex, roomIndex) => {
-    // console.log('users', );
     let shape = TETROMINOES[this.rooms[roomIndex].users[userIndex].nextTetrominos[0]];
-      let currentTetromino = {
-        position: {
-          x: Math.ceil(StageHelper.STAGE_WIDTH / 2 - shape.length / 2),
-          y: (-1 * shape.length) + 1,
-        },
-        shape,
-        collided: false,
-      }
-      this.rooms[roomIndex].users[userIndex].currentTetromino = currentTetromino;
-      this.rooms[roomIndex].users[userIndex].nextTetrominos.shift();
-      if (this.rooms[roomIndex].users[userIndex].nextTetrominos.length === 0) {
-        this.NextTetromino(roomIndex);
-      }
-      // console.log(room, 'ooooooo');
-      return this.rooms[roomIndex];
+    let currentTetromino = {
+      position: {
+        x: Math.ceil(StageHelper.STAGE_WIDTH / 2 - shape.length / 2),
+        y: (-1 * shape.length) + 1,
+      },
+      shape,
+      collided: false,
+    }
+    this.rooms[roomIndex].users[userIndex].currentTetromino = currentTetromino;
+    //console.log('user next Tetrominos', this.rooms[roomIndex].users[userIndex].nextTetrominos);
+    this.rooms[roomIndex].users[userIndex].nextTetrominos.shift();
+    if (!this.rooms[roomIndex].users[userIndex].nextTetrominos.length){
+      let nextTetromino = this.tetromino.randomTetromino();
+      this.rooms[roomIndex].users.forEach(u => {
+        u.nextTetrominos.push(nextTetromino);
+      })
+    }
+    return this.rooms[roomIndex];
   }
 
   inviteUser = (data) => {
@@ -164,6 +165,7 @@ class Rooms {
         let nextTetromino = this.rooms[roomIndex].nextTetromino;
         let user = this.newUser(data.userId, name, nextTetromino);
         this.rooms[roomIndex].users.push(user);
+        this.rooms[roomIndex].ids.push(data.userId);
       }
       resolve(this.rooms[roomIndex]);
     })
@@ -173,7 +175,8 @@ class Rooms {
     return new Promise((resolve, reject) => {
       let Index = this.rooms.findIndex((room) => room.id === data.roomId);
       if (Index === -1) return reject({ message: "Room not found" });
-      if (this.rooms[Index].status !== "waiting") return reject({ message: "Room is closed" });
+      if (this.rooms[Index].status !== "waiting" && this.rooms[Index].status !== 'end')
+        return reject({ message: "Room is closed" });
       if (this.rooms[Index].users.findIndex((user) => user.id === data.userId) !== -1)
         return reject({ message: "You are already in a room" });
       let user = this.newUser(data.userId, data.userName, this.rooms[Index].nextTetromino);
@@ -181,19 +184,23 @@ class Rooms {
       if (isInveted !== -1)
         this.rooms[Index].invit[isInveted].status = "accepted";
       this.rooms[Index].users.push(user);
+      this.rooms[Index].ids.push(data.userId);
       return resolve(this.rooms[Index]);
     });
   };
 
   // start puase or close room
-  changeStatusRoom = (data) => {
+  changeStatusRoom = (data, room) => {
+    //console.log('room new status', data.status);
     return new Promise((resolve, reject) => {
-      let roomIndex = this.rooms.findIndex((room) => room.id === data.roomId);
-      if (roomIndex === -1) return reject({ message: "Room not found" });
-      if (this.rooms[roomIndex].admin !== data.userId)
+      if (room.admin !== data.userId)
         return reject({ message: "You are not admin" });
-      this.rooms[roomIndex].status = data.status;
-      return resolve(this.rooms[roomIndex]);
+      if (room.status === 'end') this.restRoom(room);
+      if (data.status === 'closed'){
+        room.nextTetromino = this.tetromino.randomTetromino();
+      }
+      room.status = data.status;
+      return resolve(true);
     });
   };
 
@@ -204,6 +211,7 @@ class Rooms {
       let userIndex = this.rooms[roomIndex].users.findIndex((user) => user.id === userId);
       if (userIndex === -1) return reject({ message: "User is not joined" });
       this.rooms[roomIndex].users.splice(userIndex, 1);
+      this.rooms[roomIndex].ids = this.rooms[roomIndex].ids.filter((id) => id !== userId);
       return resolve(this.rooms[roomIndex]);
     });
   };
@@ -212,6 +220,15 @@ class Rooms {
     let roomIndex = this.rooms.findIndex((room) => room.id === roomId);
     this.rooms[roomIndex].admin = this.rooms[roomIndex].users[0].id;
     return this.rooms[roomIndex];
+  }
+
+  restRoom = (room) => {
+    //console.log('restRoom =>', room);
+    room.users = room.users.filter(u => !u.status || u.status === 'continue');
+    room.users.forEach((_, i) => room.users[i].status = false);
+    //console.log('room users =>', room.users);
+    room.nextTetromino = this.tetromino.randomTetromino();
+    room.users.forEach(u => u.nextTetrominos = [room.nextTetromino]);
   }
 
   deleteRoom = (id) => {

@@ -18,6 +18,7 @@ export const ROOM_ERROR = 'ROOM_ERROR';
 export const ROOM_CLOSE = 'ROOM_CLOSE';
 export const ROOM_CLEAR_ERROR = 'ROOM_CLEAR_ERROR';
 export const ROOM_UPDATE_STATUS = 'ROOM_UPDATE_STATUS';
+export const ROOM_CLEAR = 'ROOM_CLEAR';
 
 // Notification actions
 export const NOTIFICATION_RECEIVE = 'NOTIFICATION_RECEIVE';
@@ -74,6 +75,12 @@ export const ROOMS_LOADING = 'ROOMS_LOADING';
 export const GAME_UPDATE = "GAME_UPDATE";
 export const GAME_ERROR = "GAME_ERROR";
 export const GAME_LOADING = "GAME_LOADING";
+export const GAME_CLEAR = "GAME_CLEARE";
+
+// Players Actions
+export const UPDATE_ONE_PLAYER = "UPDATE_ONE_PLAYER";
+export const CLEAR_PLAYERS = "CLEAR_PLAYERS";
+export const UPDATE_ALL_PLAYERS = "UPDATE_ALL_PLAYERS"
 
 
 

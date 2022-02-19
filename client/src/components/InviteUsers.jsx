@@ -17,7 +17,7 @@ const { Option } = Select;
 const { TabPane } = Tabs;
 
 const InviteUsers = (props) => {
-  // //console.log(props, 'props2');
+  // ////console.log(props, 'props2');
 
   const [dataSource, setDataSource] = useState([]);
   const [inveted, setInveted] = useState([]);
@@ -44,7 +44,7 @@ const InviteUsers = (props) => {
         inveted: false,
       };
     });
-    // //console.log(data, "data");
+    // ////console.log(data, "data");
     setDataSource(data);
   }, [props.users]);
 
@@ -60,7 +60,7 @@ const InviteUsers = (props) => {
           error: true,
         });
     if (input.error || !input.id) return;
-    // //console.log(input.id, props.room.id, "input.value");
+    // ////console.log(input.id, props.room.id, "input.value");
     props.inviteRequest({
       userId: input.id,
       roomId: props.room.id,
@@ -78,9 +78,18 @@ const InviteUsers = (props) => {
   }, [props.invite.error]);
 
   useEffect(() => {
+    if (props.room.error){
+      message.error(props.room.error)
+      return;
+    }
+    //console.log('room update <<<<<<<<<<<');
     setUsersRoom(props.room.users);
     setInveted(props.room.invit);
   }, [props.room]);
+
+  useEffect(() => {
+    //console.log('users room update', usersRoom);
+  }, [usersRoom])
 
   useEffect(() => {
     const data = dataSource.map((user) => {
@@ -98,13 +107,12 @@ const InviteUsers = (props) => {
     setInveted(props.room.invit);
   }, [props.room.invit]);
 
-  useEffect(() => {
-    props.room.error && message.error(props.room.error);
-  }, [props.room.error]);
+  // useEffect(() => {
+  //   props.room.error && message.error(props.room.error);
+  // }, [props.room.error]);
 
   useEffect(() => {
     props.socket.socket("/").on("updateUsers", (data) => {
-      //console.log(data, "updateUsers");
       props.onlineUsersUpdate(data);
     });
 
@@ -112,7 +120,6 @@ const InviteUsers = (props) => {
 
     return () => {
       props.socket.socket("/").off("updateUsers");
-      // props.socket.socket("/").off("userJoind");
     };
   }, []);
 
@@ -258,8 +265,9 @@ const InviteUsers = (props) => {
   };
 
   const UsersInRoom = () => {
+    //console.log('get users room >>>>>>>>>>>>');
     return usersRoom.map((user, key) => {
-      return (
+     return (
         <div
           key={key}
           style={{
@@ -283,7 +291,8 @@ const InviteUsers = (props) => {
             }}
           >
             <span>{user.id}</span>
-            <span>{user.name}</span>
+            <span>{user.id === props.profile.id ? "You" : user.name}</span>
+            <span>{!user.status ? 'Joined' : user.status}</span>
           </div>
         </div>
       );
@@ -423,6 +432,7 @@ const InviteUsers = (props) => {
                   >
                     <p>UserId</p>
                     <p>Name</p>
+                    <p>Status</p>
                   </div>
                 </div>
               }
