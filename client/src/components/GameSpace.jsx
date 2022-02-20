@@ -25,6 +25,7 @@ import {
   continueGame,
   gameClear,
   clearPlayers,
+  updateRoomToPublic
 } from "../redux/actions";
 
 // import { useStage } from "../hooks/useStage";
@@ -62,7 +63,7 @@ const GameSpace = (props) => {
     // props.gameClear();
     changeFocused();
     restGame();
-    
+
     // props.socket.socket('/').on('updatePlayers', data => {
     //   // //console.log('updateplayer', data);
     //   props.updatePlayers(data);
@@ -87,6 +88,10 @@ const GameSpace = (props) => {
     setNextTetromino(props.game.nextTetrominos[0]);
     if (props.game.status === "gameOver") setGameOver(true);
     else if (props.game.status === "gameWinner") setGameWon(true);
+    else {
+      setGameOver(false);
+      setGameWon(false);
+    }
     //console.log(props.game.status);
   }, [props.game]);
 
@@ -118,18 +123,18 @@ const GameSpace = (props) => {
   }, dailyDrop);
 
   useEffect(() => {
-    if (gameStart && !gamePause && !gameWon && !gameOver){
+    if (gameStart && !gamePause && !gameWon && !gameOver) {
       setDailyDrop(500);
       // //console.log('set daily drop');
     }
-    else{
+    else {
       //console.log(gameStart, gamePause, gameWon, gameOver);
       // //console.log('cleate daily drop');
       setDailyDrop(null);
     }
   }, [gameStart, gamePause, gameWon, gameOver]);
 
- 
+
 
   const handleKeyDown = ({ keyCode }) => {
     if (!gameStart && keyCode === 13) {
@@ -201,28 +206,30 @@ const GameSpace = (props) => {
   // useEffect(() =>{
   //   //console.log('players update >>>>>>>>>>>kdjsljds');
   // }, [props.players])
+  const {room, profile, gameClear, continueGame, leaveRoom} = props;
 
   useEffect(() => {
     const modal = () => {
-      Modal.confirm({
+      // Modal.destroyAll();
+      return Modal.confirm({
         width: "500px",
         title: gameOver ? "Game Over" : "Game Won",
         content: (
           <>
             {gameOver ? "You lose!" : "You are Winner"}
-            {props.room.admin !== props.profile.id && (
+            {room.admin !== profile.id && (
               <p>
-                You will leave automata after admin restart this room
+                you will leave automatically when admin close this room
               </p>
             )}
           </>
         ),
         onOk() {
-          props.gameClear();
-          props.continueGame({ roomId: props.room.id });
+          gameClear();
+          continueGame({ roomId: room.id });
         },
         onCancel() {
-          props.leaveRoom();
+          leaveRoom();
         },
         okText: "Continue",
         cancelText: "Leave Room",
@@ -240,10 +247,11 @@ const GameSpace = (props) => {
       });
     };
     if (gameOver || gameWon) {
+      console.log(gameOver, gameWon);
       modal();
       setDailyDrop(null);
     }
-  }, [gameOver, gameWon]);
+  }, [gameOver, gameWon, room.id, room.admin, profile.id, gameClear, continueGame, leaveRoom]);
 
   // MOBILE ACTIONS
 
@@ -316,16 +324,17 @@ const GameSpace = (props) => {
           >
             {gamePause ? "Resume" : "Pause"}
           </Button>
-        ) }
+        )}
         {/* {(gameWon || gameOver) && (
           <Spin />
         )} */}
-        {props.room.isPravite && (
+        {props.room.isPrivate && (
           <Button
             type="primary"
             hidden={gameStart}
             onClick={() => {
               //console.log("swithcroom");
+              props.updateRoomToPublic({ roomId: props.room.id });
             }}
           >
             chnage room to public
@@ -349,6 +358,7 @@ const GameSpace = (props) => {
         background: "none",
       }}
     >
+      {!props.room.isPrivate && (
       <Sider
         collapsedWidth={0}
         width={280}
@@ -376,6 +386,7 @@ const GameSpace = (props) => {
       >
         <Players />
       </Sider>
+      )}
       <Content
         id="game-space"
         role="button"
@@ -390,6 +401,7 @@ const GameSpace = (props) => {
           // });
         }}
         onTouchEnd={(e) => {
+          console.log(e)
           // handleTouchEnd(e);
         }}
         style={{
@@ -402,8 +414,12 @@ const GameSpace = (props) => {
           overflow: "hidden",
         }}
       >
-        <Row style={{}}>
-          <Col span={24}>
+        <Row style={{
+          width: "100%",
+          justifyContent: "center",
+          background: 'rgba(0,0,0,0.3)',
+        }}>
+          <Col xs={24} sm={24} md={24} lg={20} xl={15} xxl={9}>
             <StageBar
               shape={TETROMINOES[nextTetromino].shape}
               score={scor}
@@ -431,19 +447,20 @@ const GameSpace = (props) => {
             }}
           >
             <Spin
-            spinning={gameOver || gameWon}
-            tip={props.profile.id !== props.room.admin ? "Waiting admin close this room" : null}
-            style={{
-              color: 'black',
-              fontSize: 20,
-            }}
+              spinning={gameOver || gameWon}
+              tip={props.profile.id !== props.room.admin ? "Waiting admin close this room" : null}
+              style={{
+                color: 'black',
+                fontSize: 20,
+              }}
             >
-            <Stage stage={userStage} />
+              <Stage stage={userStage} />
             </Spin>
             {bottons()}
           </Col>
         </Row>
       </Content>
+      {!props.room.isPrivate && (
       <Sider
         collapsedWidth={0}
         width={280}
@@ -475,6 +492,7 @@ const GameSpace = (props) => {
       >
         <Message />
       </Sider>
+      )}
     </Layout>
   );
 };
@@ -501,4 +519,5 @@ export default connect(mapStateToProps, {
   continueGame,
   gameClear,
   clearPlayers,
+  updateRoomToPublic,
 })(GameSpace);

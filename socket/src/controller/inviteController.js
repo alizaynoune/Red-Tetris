@@ -55,6 +55,7 @@ class InviteController {
         try {
 
             let user = await this.users.getUser(socket.id);
+            if (user.isJoined && status === 'accepted') return callback(null, {message: 'You are already joined to room'});
             let notifIndex = user.notif.findIndex((item) => item.id === data.notifId);
             if (notifIndex === -1) return callback(null, { message: "Notification not found" });
             if (user.notif[notifIndex].type !== "invitation") return callback(null, { message: "Notification is not invitation" });
@@ -82,7 +83,6 @@ class InviteController {
                     read: true,
                 }
                 let userIds = room.users.map(e => e.id).filter(id => id !== user.id && id !== room.admin);
-                ////console.log("userIds2 =>", userIds);
                 userIds.length && this.io.to(userIds).emit("notification", notifUsers);
                 roomInfo = _.omit(room, ["invit", "users", "ids", 'nextTetromino']);
                 let game = room.users.find(u => u.id === socket.id);
@@ -93,10 +93,8 @@ class InviteController {
             }
             this.io.to(room.admin).emit("updateRoom", room);
             this.io.to(room.admin).emit("notification", notifAdmin);
-            ////console.log("room => ", room);
             return callback({ profile: user, room: roomInfo }, null);
         } catch (error) {
-            ////console.log(error);
             return callback(null, error);
         }
     }

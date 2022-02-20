@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, message, Button, List, Tooltip} from "antd";
+import { Layout, message, Button, List, Tooltip } from "antd";
 
 import Nabar from "../components/Navbar";
 import FooterComponent from "../components/Footer";
@@ -32,8 +32,8 @@ import "./styles/HeaderStyled.css";
 const { Header, Content, Footer, Sider } = Layout;
 
 const HomePage = (props) => {
-  const { profile, room} = props;
-  const [hash, setHash] = useState({
+  const { profile, room, refreshRooms, login, createOrJoinRoom } = props;
+  const [hashUrl, setHashUrl] = useState({
     name: null,
     room: null,
     error: "",
@@ -42,14 +42,15 @@ const HomePage = (props) => {
   const [tooltipVisible, setTooltipVisible] = useState(true);
   const [rooms, setRooms] = useState([]);
 
+
   useEffect(() => {
-    if (props.profile.isAuth && !props.profile.isJoined) {
+    if (profile.isAuth && !profile.isJoined) {
       setTimeout(() => {
         setTooltipVisible(false);
       }, 3000);
-      props.refreshRooms();
+      refreshRooms();
     } else setCollapsed(true);
-  }, [props.profile]);
+  }, [profile, refreshRooms]);
 
   useEffect(() => {
     setRooms(props.rooms.rooms);
@@ -57,96 +58,101 @@ const HomePage = (props) => {
 
   useEffect(() => {
     ////console.log("hash", hash);
-    if (hash.error) message.error(hash.error);
-    else if (hash.name && hash.room) {
+    if (hashUrl.error) message.error(hashUrl.error);
+    else if (hashUrl.name && hashUrl.room) {
       ////console.log("login by url-hash", hash);
-      props.login(hash.name);
+      login(hashUrl.name);
     }
-  }, [hash]);
+  }, [hashUrl, login]);
 
   useEffect(() => {
-    if (props.profile.isAuth && !props.profile.isJoined && !hash.error && hash.room) {
+    if (profile.isAuth && !profile.isJoined && !hashUrl.error && hashUrl.room) {
       ////console.log('don1');
       let roomInfo = {
-        roomName: hash.room,
-        isPravite: false,
-        userId: props.profile.id,
+        roomName: hashUrl.room,
+        isPrivate: true,
+        userId: profile.id,
       };
-
-      props.createOrJoinRoom(roomInfo);
+      setHashUrl({
+        name: null,
+        room: null,
+        error: "",
+      });
+      createOrJoinRoom(roomInfo);
     }
-  }, [props.profile]);
+  }, [hashUrl, profile, createOrJoinRoom]);
 
+
+  const {updateUser, updateGame, updateAllPlayers, gameClear, clearRoom, refreshRoom, socket} = props;
   useEffect(() => {
     //console.log('socket changed');
-    if (props.socket.socket) {
+    if (socket.socket) {
       // MOVE THIS LISTENERS TO GAME SPACE
-      props.socket.socket.socket("/").on("updateProfile", (data) => {
+      socket.socket.socket("/").on("updateProfile", (data) => {
         //console.log("udpate profile", data)
-        props.updateUser(data);
+        updateUser(data);
       });
-      props.socket.socket.socket("/").on("updateRooms", (data) => {
+      socket.socket.socket("/").on("updateRooms", (data) => {
         //console.log("update rooms", data);
-        props.refreshRooms(data);
+        refreshRooms(data);
       });
-      props.socket.socket.socket("/").on("updateRoom", (data) => {
-        props.refreshRoom(data);
+      socket.socket.socket("/").on("updateRoom", (data) => {
+        refreshRoom(data);
         //console.log("update Room ============>", data);
       });
-      props.socket.socket.socket('/').on("updateGame", data => {
+      socket.socket.socket('/').on("updateGame", data => {
         //console.log('update Game <<<<<<<<<<>>>>>>>>', data);
-        props.updateGame(data);
+        updateGame(data);
       })
-      props.socket.socket.socket('/').on("updateAllPlayers", data =>{
+      socket.socket.socket('/').on("updateAllPlayers", data => {
         //console.log('all Players ====>', data);
-        props.updateAllPlayers(data)
+        updateAllPlayers(data)
       })
-      props.socket.socket.socket('/').on("leaveRoom", data => {
-        props.gameClear();
-        props.clearRoom();
-        props.updateUser(data)
+      socket.socket.socket('/').on("leaveRoom", data => {
+        gameClear();
+        clearRoom();
+        updateUser(data)
       })
       return () => {
-        props.socket.socket.socket("/").off("updateProfile");
-        props.socket.socket.socket("/").off("updateRooms");
-        props.socket.socket.socket("/").off("updateRoom");
-        props.socket.socket.socket("/").off("leaveRoom");
-        props.socket.socket.socket("/").off("updateGame");
-        props.socket.socket.socket("/").off("updateAllPlayers");
+        socket.socket.socket("/").off("updateProfile");
+        socket.socket.socket("/").off("updateRooms");
+        socket.socket.socket("/").off("updateRoom");
+        socket.socket.socket("/").off("leaveRoom");
+        socket.socket.socket("/").off("updateGame");
+        socket.socket.socket("/").off("updateAllPlayers");
       };
     }
-    if (props.socket.error) {
-      message.error(props.socket.error);
+    if (socket.error) {
+      message.error(socket.error);
     }
-  }, [props.socket]);
+  }, [socket, updateUser, updateGame, updateAllPlayers, gameClear, clearRoom, refreshRoom, refreshRooms]);
 
   useEffect(() => {
-    ////console.log("done");
     const hashBased = () => {
       const { hash } = window.location;
-      if (hash && !props.profile.isAuth) {
+      if (hash && !profile.isAuth) {
         const Regx = new RegExp(/(^#[\w-]+\[[\w-]+\]$)/g);
         const match = hash.match(Regx);
         ////console.log("match", match);
         if (!match) {
-          setHash({
-            ...hash,
+          setHashUrl({
             error: "Invalid hash-based url",
           });
         } else {
           const split = hash.match(/([\w-]+)/g);
           ////console.log("split", split);
-          setHash({
+          setHashUrl({
             room: split[0],
             name: split[1],
             error: "",
           });
         }
-        // window.location.hash = '';
+        // window.location.hash = "";
       }
     };
-    hashBased();
-  }, []);
+
+    !profile.isAuth && hashBased();
+  }, [profile.isAuth]);
 
   const handleJoinToRoom = (room) => {
     props.joinRoom(room.id);
@@ -234,7 +240,7 @@ const HomePage = (props) => {
             <FormUserName />
           ) : !room.name ? (
             <FormRoomName />
-          ) : !room.isPravite &&
+          ) : !room.isPrivate &&
             (room.status === "waiting" || (props.game.status === 'continue' && room.status === 'end')) &&
             profile.id === room.admin ? (
             <InviteUsers />

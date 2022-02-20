@@ -16,7 +16,8 @@ class App {
     this.server = createServer();
     this.io = new Server(this.server, {
       cors: {
-        origin: "http://localhost:3000",
+        // origin: "http://localhost:3000",
+        origin: "*",
         methods: ["GET", "POST"],
       },
     });
@@ -119,6 +120,8 @@ class App {
 
       socket.on("createOrJoin", this.RoomsController.createOrJoinRoom(socket))
 
+      socket.on("changeRoomToPublid", this.RoomsController.changeRoomToPublic(socket))
+
 
 
 
@@ -160,6 +163,7 @@ class App {
        */
       socket.on("disconnect", this.AuthController.logout(socket));
       socket.on("error", (error) => {
+        console.log(error, 'log error');
         socket.emit("error", { message: error.message });
       });
 
