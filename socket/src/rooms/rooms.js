@@ -76,7 +76,7 @@ class Rooms {
     return new Promise((resolve, reject) => {
       let trimName = data.roomName.trim().toLowerCase();
       if (!this.regx.test(trimName)) {
-        return reject({ message: "Room name is invalid" });
+        return reject({ message: "Please enter a valid name" });
       }
       let existingRoom = this.rooms.find((room) => room.name === trimName);
       if (existingRoom) {
@@ -125,7 +125,6 @@ class Rooms {
       collided: false,
     }
     this.rooms[roomIndex].users[userIndex].currentTetromino = currentTetromino;
-    //console.log('user next Tetrominos', this.rooms[roomIndex].users[userIndex].nextTetrominos);
     this.rooms[roomIndex].users[userIndex].nextTetrominos.shift();
     if (!this.rooms[roomIndex].users[userIndex].nextTetrominos.length){
       let nextTetromino = this.tetromino.randomTetromino();

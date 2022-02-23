@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "start": "nodemon --ignore ./test/ ./src/app.js  --trace-warnings"
   },
   "keywords": [],
@@ -24,6 +24,14 @@
   "jest" :{
     "collectCoverage": true,
     "coverageReporters": ["html", "text-summary"],
-    "collectCoverageFrom": [ "src/**/*.js"]
+    "collectCoverageFrom": [ "src/**/*.js"],
+    "setupFilesAfterEnv": ["./test/config/jest.config.js"],
+    "globals": {
+      "__io__": null,
+      "__socketServer__": null,
+      "__socketClient__": null,
+      "__PORT__": 2022,
+      "__URL__": "http://localhost"
+    }
   }
 }
