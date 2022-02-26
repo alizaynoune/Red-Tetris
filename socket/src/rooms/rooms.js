@@ -29,20 +29,20 @@ class Rooms {
     return rooms;
   };
 
-  getRoomUsers = (id) => {
-    return new Promise((resolve, reject) => {
-      const room = this.rooms.find((room) => room.id === id);
-      if (room) {
-        let users = room.users.map((user) => {
-          return (
-            (({ id }) => ({ id }))(user)
-          )
-        });
-        return resolve(users);
-      }
-      return reject({ message: "Room not found" });
-    });
-  };
+  // getRoomUsers = (id) => {
+  //   return new Promise((resolve, reject) => {
+  //     const room = this.rooms.find((room) => room.id === id);
+  //     if (room) {
+  //       let users = room.users.map((user) => {
+  //         return (
+  //           (({ id }) => ({ id }))(user)
+  //         )
+  //       });
+  //       return resolve(users);
+  //     }
+  //     return reject({ message: "Room not found" });
+  //   });
+  // };
 
   getRoom = (id) => {
     return new Promise((resolve, reject) => {
@@ -106,13 +106,13 @@ class Rooms {
     });
   };
 
-  NextTetromino = (roomIndex) => {
-    let nextTetromino = this.tetromino.randomTetromino();
-    this.rooms[roomIndex].nextTetrominos = nextTetromino;
-    this.rooms[roomIndex].users.forEach(u => {
-      u.nextTetrominos.push(nextTetromino);
-    })
-  }
+  // NextTetromino = (roomIndex) => {
+  //   let nextTetromino = this.tetromino.randomTetromino();
+  //   this.rooms[roomIndex].nextTetrominos = nextTetromino;
+  //   this.rooms[roomIndex].users.forEach(u => {
+  //     u.nextTetrominos.push(nextTetromino);
+  //   })
+  // }
 
   changeCurrentTetromino = (userIndex, roomIndex) => {
     let shape = TETROMINOES[this.rooms[roomIndex].users[userIndex].nextTetrominos[0]];
