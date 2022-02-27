@@ -1,11 +1,7 @@
 import React from 'react';
-// import { Routes, Route } from 'react-router-dom';
-
-// Home page component
 import HomePage from './pages/HomePage';
-// import Page404 from './pages/404';
-
-// Style
+import NotFound from './pages/404'
+import { Routes, Route } from 'react-router-dom'
 import 'antd/dist/antd.css';
 import './App.css';
 
@@ -13,10 +9,13 @@ import './App.css';
 
 function App() {
 
-  // ////console.log(process.env)
   return (
     <div className="App">
-      <HomePage />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { connect } from "react-redux";
 import { createRoom, createOrJoinRoom } from "../redux/actions";
 
 const FormRoomName = (props) => {
+  const { room, profile, createOrJoinRoom } = props;
+
   const [input, setInput] = useState({
     value: "",
     error: false,
@@ -28,19 +30,18 @@ const FormRoomName = (props) => {
     };
     input.value.length > 2
       ? setInput({
-          ...input,
-          error: false,
-        })
+        ...input,
+        error: false,
+      })
       : setInput({
-          ...input,
-          error: true,
-        });
+        ...input,
+        error: true,
+      });
     if (input.value.length > 2 && !input.error) {
       props.createRoom(data);
     }
   };
 
-  const {room, profile, createOrJoinRoom} = props;
 
   useEffect(() => {
     if (room.error) {
@@ -56,13 +57,17 @@ const FormRoomName = (props) => {
               userId: profile.id,
             };
             createOrJoinRoom(data);
-            //console.log("click ok");
           },
-          onCancel() {},
+          onCancel() { },
         });
-      } else message.error(room.error);
+      }
     }
   }, [room, profile.id, createOrJoinRoom, input.value]);
+
+  useEffect(() => {
+    room.error && room.error !== "Room is already exists do you want to join"
+      && message.error(room.error)
+  }, [room.error])
 
   return (
     <Form
