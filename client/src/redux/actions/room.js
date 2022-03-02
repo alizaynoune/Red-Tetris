@@ -86,7 +86,7 @@ export const updateRoomToPublic = (data) => {
     try {
       dispatch({ type: LOADING_ROOM });
       const io = getState().socket.socket;
-      const res = await socket(io, "changeRoomToPublid", data);
+      const res = await socket(io, "changeRoomToPublic", data);
       dispatch(success(res, ROOM_REFRESH));
     } catch (err) {
       dispatch(error(err, ROOM_ERROR));

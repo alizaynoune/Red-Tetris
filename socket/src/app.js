@@ -115,7 +115,7 @@ class App {
 
       socket.on("createOrJoin", this.RoomsController.createOrJoinRoom(socket))
 
-      socket.on("changeRoomToPublid", this.RoomsController.changeRoomToPublic(socket))
+      socket.on("changeRoomToPublic", this.RoomsController.changeRoomToPublic(socket))
 
 
 

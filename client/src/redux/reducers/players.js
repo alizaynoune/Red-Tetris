@@ -17,7 +17,7 @@ const updateOnePlayer = (player, players) => {
     return players;
 }
  
-export default (state = INITIAL_STATE, action) => {
+const playersReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case UPDATE_ONE_PLAYER:
             return{
@@ -33,3 +33,5 @@ export default (state = INITIAL_STATE, action) => {
             return state
     }
 }
+
+export default playersReducer

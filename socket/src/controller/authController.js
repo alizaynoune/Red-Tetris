@@ -54,7 +54,7 @@ class AuthController {
                         })
                         this.io.to(newAdmin.id).emit('notification', {
                             message: `you are admin of this room`,
-                            type: 'notif',
+                            type: 'notification',
                         })
                         this.io.to(newAdmin.id).emit("updateRoom", updateRoom);
                         let resUsers = _.omit(updateRoom, ["invit"]);

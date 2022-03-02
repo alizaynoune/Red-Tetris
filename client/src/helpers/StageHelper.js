@@ -2,17 +2,8 @@ import React from 'react';
 import { TETROMINOES } from './Tetrominoes';
 import { TetrominoStyle } from '../components/styles/TetrominoStyle';
 
-
 export const STAGE_WIDTH = 10;
 export const STAGE_HEIGHT = 20;
-
-export const InitStage = () => {
-    const stage = Array.from(Array(STAGE_HEIGHT), () =>
-        new Array(STAGE_WIDTH).fill([0, 'clear']));
-
-    return stage
-
-}
 
 export const CreateStage = (map) => {
     return map.map(row => {
