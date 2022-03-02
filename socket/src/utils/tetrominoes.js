@@ -38,6 +38,10 @@ const TETROMINOES = {
 }
 
 class TetrominoesClass {
+    /**
+     * @description get a random index form arry(TETROMINOES)
+     * @returns random arry form TETROMINOES
+     */
     randomTetromino = () => {
         const indexs = 'IJLOSTZ';
         const random = indexs[Math.floor(Math.random() * indexs.length)];

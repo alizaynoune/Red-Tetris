@@ -11,9 +11,9 @@ class AuthController {
     }
 
     /**
-     * @description accept invetation join room
+     * @description login
      * @param {object} socket - socket object
-     * @param {object} data - {userName} 
+     * @param {string} data - user name
      * @param {function} callback - (res, err)
      */
     login = (socket) => async (data, callback) => {

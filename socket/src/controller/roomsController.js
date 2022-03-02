@@ -44,6 +44,12 @@ class RoomController {
     };
 
 
+    /**
+     * 
+     * @param {object} socket - socket object
+     * @param {string} data - room name 
+     * @returns {object} room
+     */
     createOrJoinRoom = (socket) => async (data, callback) => {
         try {
             if (!data || typeof data !== 'object' || typeof data.roomName !== 'string'
@@ -182,6 +188,13 @@ class RoomController {
         }
     };
 
+    /**
+     * 
+     * @param {object} socket 
+     * @param {object} data - {roomId}
+     * @param {function} callback - (res, err)
+     * @returns {object} room
+     */
     changeRoomToPublic = (socket) => async (data, callback) => {
         try {
             if (!data || typeof data !== 'object' || typeof data.roomId !== 'string')

@@ -8,6 +8,12 @@ class MessagesController {
         this.rooms = new Rooms;
     }
 
+    /**
+     * 
+     * @param {object} socket - socket object 
+     * @param {object} data - {roomId, message}
+     * @returns {object} new message
+     */
     sentMessage = (socket) => async (data, callback) => {
         try {
             let user = await this.users.getUser(socket.id);

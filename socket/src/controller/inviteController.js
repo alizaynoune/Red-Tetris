@@ -46,7 +46,13 @@ class InviteController {
         }
     }
 
-
+    /**
+     * 
+     * @param {object} socket - socket object 
+     * @param {string} status - accept or decline
+     * @param {function} callback  - (res, err)
+     * @returns 
+     */
     changeStatusInvitation = (socket, status) => async (data, callback) => {
         try {
             if (!data || typeof data !== 'object' || typeof data.notifId !== 'string')

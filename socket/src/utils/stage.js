@@ -4,6 +4,10 @@ const STAGE_HEIGHT = 20;
 
 
 class Stage {
+    /**
+     * @description init a new stage
+     * @returns array
+     */
     initStage = () => {
         const newStage = Array.from(Array(STAGE_HEIGHT), () =>
             new Array(STAGE_WIDTH).fill([0, 'clear']))
