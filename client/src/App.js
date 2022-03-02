@@ -1,6 +1,6 @@
 import React from 'react';
 import HomePage from './pages/HomePage';
-import NotFound from './pages/404'
+import NotFound from './pages/NotFoundPage'
 import { Routes, Route } from 'react-router-dom'
 import 'antd/dist/antd.min.css';
 import './App.css';

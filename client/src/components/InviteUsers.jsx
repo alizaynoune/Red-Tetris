@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-
 import { Form, Input, Button, message, Card, Select, Tabs } from "antd";
-
 import { gold, red } from "@ant-design/colors";
 import {
   inviteRequest,
@@ -206,7 +204,6 @@ const InviteUsers = (props) => {
             flexWrap: "wrap",
             justifyContent: "center",
             alignItems: "center",
-            // flex: 2,
             backgroundColor: index % 2 === 0 ? "#fafafa" : "#f0f0f0",
           }}
         >
@@ -424,7 +421,6 @@ const InviteUsers = (props) => {
             {UsersInRoom()}
           </div>
         </TabPane>
-        {/* Tabs End */}
       </Tabs>
     </Card>
   );

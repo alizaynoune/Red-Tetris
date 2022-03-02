@@ -2,7 +2,11 @@ const { STAGE_HEIGHT, STAGE_WIDTH } = require('../utils/stage');
 
 class Players {
 
-    // reset Map
+    /**
+     * @description reset player info
+     * @param {object} player 
+     * @param {key} nextTetromino 
+     */
     resetGame = (player, nextTetromino) => {
         player.map = player.map.map(row => row.map(_ => [0, "clear"]));
         player.status = "continue";
@@ -17,14 +21,22 @@ class Players {
         }
     }
 
-    // clear Map
+    /**
+     * @description clear player map
+     * @param {object} player 
+     */
     clearMap = (player) => {
         player.map = player.map.map(y => y.map(cell =>
             cell[1] === "clear" || cell[1] === "shadow" ? [0, "clear"] : cell
         ))
     }
 
-    // update Map
+    /**
+     * @description update tetromino position
+     * @param {object} player 
+     * @param {object} shadow 
+     * @returns {object} new map
+     */
     updateMap = (player, shadow) => {
         this.clearMap(player);
         let { position, collided, shape } = player.currentTetromino;
@@ -45,7 +57,14 @@ class Players {
     }
 
 
-    // checkCollision
+    /**
+     * 
+     * @param {object} dir - direction {x, y} 
+     * @param {object} map 
+     * @param {object} position 
+     * @param {array} shape 
+     * @returns {boolean}
+     */
     checkCollision = (dir, map, position, shape) => {
         for (let y = 0; y < shape.length; y++) {
             for (let x = 0; x < shape[y].length; x++) {
@@ -71,7 +90,12 @@ class Players {
         return false;
     }
 
-    // move Tetromino
+    /**
+     * 
+     * @param {object} dir {x, y} 
+     * @param {object} player 
+     * @returns {boolean}
+     */
     moveTetromino = (dir, player) => {
         let { shape, position } = player.currentTetromino;
         if (!this.checkCollision(dir, player.map, position, shape)) {
@@ -82,7 +106,10 @@ class Players {
         return false;
     }
 
-    // rotate Tetromino
+    /**
+     * @description rotate current tetromino 90deg
+     * @param {object} player 
+     */
     rotateTetromino = (player) => {
         let { shape, position } = player.currentTetromino;
         let len = shape.length - 1;
@@ -103,7 +130,11 @@ class Players {
         }
     }
 
-    // Drop Tetromino to down
+    /**
+     * 
+     * @param {object} player 
+     * @returns {int} - new position of y
+     */
     dropToDown = (player) => {
         let y = 0;
         let { shape, position } = player.currentTetromino;
@@ -112,7 +143,12 @@ class Players {
         return y ? y - 1 : y;
     }
 
-    // add Wall
+    /**
+     * 
+     * @param {key} playerId 
+     * @param {object} players 
+     * @param {number} walls 
+     */
     addWall = (playerId, players, walls) => {
         players.forEach(player => {
             if (player.id !== playerId) {
@@ -126,7 +162,11 @@ class Players {
         });
     }
 
-    // delet row
+    /**
+     * 
+     * @param {object} player 
+     * @param {object} players 
+     */
     deletRow = (player, players) => {
         let rows = 0;
         let bonus = 0;
@@ -150,7 +190,10 @@ class Players {
         }
     }
 
-    // getWinner
+    /**
+     * 
+     * @param {object} room 
+     */
     getWinner = (room) => {
         let winners = [], indexs = [];
         room.users.forEach((u, i) => {
@@ -166,7 +209,13 @@ class Players {
         else if (room.users.length === 1) room.status = 'end'
     }
 
-    // get action
+    /**
+     * 
+     * @param {string} a - action dropDown | right | left | rotat | down
+     * @param {object} player 
+     * @param {object} room 
+     * @returns 
+     */
     action = (a, player, room) => {
         return new Promise((resolve, reject) => {
             if (!['dropDown', 'right', 'left', 'rotate', 'down'].includes(a))

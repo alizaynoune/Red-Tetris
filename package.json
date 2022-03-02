@@ -7,7 +7,7 @@
     "client": "npm start --prefix client/",
     "socket": "npm start --prefix socket/",
     "build": "npm run build --prefix client/",
-    "testSocket" : "npm run test --prefix socket/"
+    "coverage" : "npm run coverage --prefix socket/"
   },
   "rules": {
     "react/react-in-jsx-scope": "off"

@@ -1,6 +1,11 @@
 
 class AuthMiddleware {
 
+    /**
+     * 
+     * @param {object} socket 
+     * @returns 
+     */
     auth = (socket) => (packet, next) => {
         if (typeof packet[2] !== 'function'){
             const err = new Error("Please use callback function like (evet, data, callback(res, err))")

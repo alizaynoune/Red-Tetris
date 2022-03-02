@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
-
 import { CreateStage } from "../helpers/StageHelper";
 import { UsersStage, SliderMaps } from "./styles/UsersStage";
 import { updateOnePlayer } from "../redux/actions";

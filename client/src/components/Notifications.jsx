@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Menu, Badge, Popover, notification, message } from "antd";
 import { BellOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
-
 import "./styles/NotificationsStyled.css";
-
 import { pushNotification, changeStatusInvite } from "../redux/actions";
 
 const { SubMenu } = Menu;

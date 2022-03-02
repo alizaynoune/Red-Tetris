@@ -14,7 +14,7 @@ class App {
     this.server = createServer();
     this.io = new Server(this.server, {
       cors: {
-        // origin: "http://localhost:3000",
+        // origin: process.env.IO_URL,
         origin: "*",
         methods: ["GET", "POST"],
       },
@@ -68,7 +68,7 @@ class App {
 
       /***************************** Chat *************************************/
       socket.on("sentMessage", this.MessagesController.sentMessage(socket));
-      
+
       /******************************* logout **********************************/
       socket.on("disconnect", this.AuthController.logout(socket));
       socket.on("error", (error) => {

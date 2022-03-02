@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Layout, message, Button, List, Tooltip } from "antd";
 
-import Nabar from "../components/Navbar";
+import Navbar from "../components/Navbar";
 import FooterComponent from "../components/Footer";
 import FormUserName from "../components/FormUserName";
 import FormRoomName from "../components/FormRoomName";
@@ -132,7 +132,7 @@ const HomePage = (props) => {
             error: "",
           });
         }
-        // window.location.hash = "";
+        window.location.hash = "";
       }
     };
 
@@ -148,7 +148,6 @@ const HomePage = (props) => {
       <List
         style={{
           background: "transparent",
-          // background: 'green',
           color: "white",
         }}
       >
@@ -190,14 +189,10 @@ const HomePage = (props) => {
       style={{
         background: "none",
         width: "100%",
-        // height: "calc(100vh - 30px)",
         height: 'calc(100vh - 50px)',
-        // position: 'relative',
         padding: 0,
         margin: 0,
         overflow: "hidden !important",
-        // display: 'flex',
-        // flexDirection: 'column',
       }}
     >
       <Header
@@ -210,7 +205,7 @@ const HomePage = (props) => {
           zIndex: "998",
         }}
       >
-        <Nabar />
+        <Navbar />
       </Header>
       <Layout
         style={{
@@ -262,8 +257,6 @@ const HomePage = (props) => {
           style={{
             background: "rgba(0, 0, 0, 0.5)",
             height: "100%",
-            // margin: 0,
-            // padding: 0,
             marginTop: "-10px",
             paddingTop: "10px",
             fontSize: "20px",

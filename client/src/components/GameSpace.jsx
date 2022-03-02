@@ -13,7 +13,6 @@ import { StageStyled } from './styles/StageStyled'
 import Message from "./Message";
 import Players from "./Players";
 import StageBar from "./StageBar";
-
 import {
   createStage,
   updateStage,
@@ -27,7 +26,6 @@ import {
   clearPlayers,
   updateRoomToPublic
 } from "../redux/actions";
-
 import { useInterval } from "../hooks/useInterval";
 
 const { Content, Sider } = Layout;
@@ -117,7 +115,9 @@ const GameSpace = (props) => {
     }
   }, [gameStart, gamePause, gameWon, gameOver]);
 
-
+  const handleKeyUp = (e) => {
+    if (gameStart && !gamePause && !gameWon && !gameOver) setDailyDrop(500);
+  };
 
   const handleKeyDown = ({ keyCode }) => {
     if (!gameStart && keyCode === 13) {
@@ -169,12 +169,12 @@ const GameSpace = (props) => {
       action: 'down',
       roomId: props.room.id
     }
-    if (Math.abs(deltaX - deltaY) <= 2) deltaX = deltaY;
-    if (deltaX === deltaY) {
+    // if (deltaX === deltaY) {
+    if (Math.abs(deltaX - deltaY) <= 3) {
       data.action = 'dropDown'
       props.gameActions(data)
     }
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    else if (Math.abs(deltaX) > Math.abs(deltaY)) {
       if (deltaX > 0) {
         data.action = 'right'
         props.gameActions(data)
@@ -188,10 +188,6 @@ const GameSpace = (props) => {
         props.gameActions(data)
       }
     }
-  };
-
-  const handleKeyUp = (e) => {
-    if (gameStart && !gamePause && !gameWon && !gameOver) setDailyDrop(500);
   };
 
   const { room, profile, gameClear, continueGame, leaveRoom } = props;
@@ -371,7 +367,7 @@ const GameSpace = (props) => {
           marginTop: "-10px",
           overflow: "hidden",
           cursor: 'default',
-                  outline: 'none'
+          outline: 'none'
         }}
       >
         <Row style={{

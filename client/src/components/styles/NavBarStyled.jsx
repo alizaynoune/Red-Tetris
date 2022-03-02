@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-
 import background from '../../img/header.png'
 
 export const NavbarStyled = styled.nav`

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-
 import { Button, Input, message, Form } from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import moment from "moment";
-
 import {
   BoxMessage,
   MessageContent,
@@ -12,8 +10,9 @@ import {
   MessageText,
   MessageCreatedAt,
 } from "./styles/BoxMessage";
-
 import { sentMessage, receiveMessage, clearMessages } from "../redux/actions";
+
+
 const Message = (props) => {
   const { profile } = props;
   const [form] = Form.useForm();

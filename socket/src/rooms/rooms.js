@@ -24,11 +24,20 @@ class Rooms {
     this.tetromino = new TetrominoesClass;
   }
 
+  /**
+   * @description get all current rooms
+   * @returns {object} current rooms
+   */
   getRooms = () => {
     let rooms = this.rooms.filter((room) => room.isPrivate === false);
     return rooms;
   };
 
+  /**
+   * 
+   * @param {string} id - room id 
+   * @returns {object} room
+   */
   getRoom = (id) => {
     return new Promise((resolve, reject) => {
       let index = this.rooms.findIndex((room) => room.id === id);
@@ -38,6 +47,13 @@ class Rooms {
     });
   };
 
+  /**
+   * 
+   * @param {string} id - user id 
+   * @param {string} name - user name
+   * @param {key} nextTetrominos - next tetromino index
+   * @returns {object} new user
+   */
   newUser = (id, name, nextTetrominos) => {
     let user = {
       id,
@@ -57,6 +73,12 @@ class Rooms {
     return user;
   }
 
+  /**
+   * 
+   * @param {object} data - room info {name, isPrivate}
+   * @param {object} user - user info {id, name} 
+   * @returns {object} room
+   */
   createRoom = (data, user) => {
     return new Promise((resolve, reject) => {
       let trimName = data.roomName.trim().toLowerCase();
@@ -91,6 +113,12 @@ class Rooms {
     });
   };
 
+  /**
+   * 
+   * @param {key} userIndex 
+   * @param {key} roomIndex 
+   * @returns {object} room
+   */
   changeCurrentTetromino = (userIndex, roomIndex) => {
     let shape = TETROMINOES[this.rooms[roomIndex].users[userIndex].nextTetrominos[0]];
     let currentTetromino = {
@@ -128,7 +156,11 @@ class Rooms {
     });
   };
 
-
+  /**
+   * 
+   * @param {object} data - {userId, roomId, status} 
+   * @returns {object} room
+   */
   changeStatusInvitation = (data) => {
     return new Promise((resolve, reject) => {
       let roomIndex = this.rooms.findIndex((room) => room.id === data.roomId);
@@ -147,6 +179,11 @@ class Rooms {
     })
   }
 
+  /**
+   * 
+   * @param {object} data {roomId, userId, userName}
+   * @returns {object} room
+   */
   joinRoom = (data) => {
     return new Promise((resolve, reject) => {
       let Index = this.rooms.findIndex((room) => room.id === data.roomId);
@@ -165,7 +202,12 @@ class Rooms {
     });
   };
 
-  // start puase or close room
+  /**
+   * 
+   * @param {object} data - {userId, status}
+   * @param {object} room - room object
+   * @returns {object} room
+   */
   changeStatusRoom = (data, room) => {
     return new Promise((resolve, reject) => {
       if (room.admin !== data.userId)
@@ -179,6 +221,12 @@ class Rooms {
     });
   };
 
+  /**
+   * 
+   * @param {key} userId 
+   * @param {key} roomId 
+   * @returns {object} room
+   */
   leaveRoom = (userId, roomId) => {
     return new Promise((resolve, reject) => {
       let roomIndex = this.rooms.findIndex((room) => room.id === roomId);
@@ -191,12 +239,21 @@ class Rooms {
     });
   };
 
+  /**
+   * 
+   * @param {key} roomId 
+   * @returns {object} room
+   */
   switchAdmin = (roomId) => {
     let roomIndex = this.rooms.findIndex((room) => room.id === roomId);
     this.rooms[roomIndex].admin = this.rooms[roomIndex].users[0].id;
     return this.rooms[roomIndex];
   }
 
+  /**
+   * 
+   * @param {object} room 
+   */
   restRoom = (room) => {
     room.users = room.users.filter(u => !u.status || u.status === 'continue');
     room.users.forEach((_, i) => room.users[i].status = false);
@@ -204,6 +261,11 @@ class Rooms {
     room.users.forEach(u => u.nextTetrominos = [room.nextTetromino]);
   }
 
+  /**
+   * 
+   * @param {key} id 
+   * @returns {object} current rooms
+   */
   deleteRoom = (id) => {
     return new Promise((resolve, reject) => {
       let roomIndex = this.rooms.findIndex((room) => room.id === id);

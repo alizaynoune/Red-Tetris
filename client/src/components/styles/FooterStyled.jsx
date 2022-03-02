@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-
 import background from '../../img/footer.png'
 
 export const FooterStyled = styled.footer`
