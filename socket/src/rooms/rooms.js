@@ -87,7 +87,7 @@ class Rooms {
       }
       let existingRoom = this.rooms.find((room) => room.name === trimName);
       if (existingRoom) {
-        if (existingRoom.status !== 'waiting')
+        if (existingRoom.status !== 'waiting' && existingRoom.status !== 'end')
           return reject({
             message: "Room is already exists and closed",
           });
