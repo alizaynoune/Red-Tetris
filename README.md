@@ -5,18 +5,18 @@ game from a stack of software exclusively Full Stack Javascript
 
 # Technology used in this project
 
-## front-end
-ReactJs, Redux, Sockect.io
+### front-end
+* ReactJs, Redux, Sockect.io
 
-## back-end
-NodeJs, Socket.io
+### back-end
+* NodeJs, Socket.io
 
 # Project Screenshot
 
 ## Home
 ![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/home.png?raw=true)
 
-## Online Rooms
+## Create Room && Online Rooms
 ![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/onlineRooms.png?raw=true)
 
 ## User Invitation
