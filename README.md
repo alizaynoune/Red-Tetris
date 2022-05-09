@@ -17,19 +17,19 @@ game from a stack of software exclusively Full Stack Javascript
 ![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/home.png?raw=true)
 
 ## Create Room && Online Rooms
-![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/onlineRooms.png?raw=true)
+![online-rooms](https://github.com/alizaynoune/Red-Tetris/blob/main/images/onlineRooms.png?raw=true)
 
 ## User Invitation
-![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/invitation.png?raw=true)
+![invitation](https://github.com/alizaynoune/Red-Tetris/blob/main/images/invitation.png?raw=true)
 
 ## Solo Player
-![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/soloPlayer.png?raw=true)
+![solo-player](https://github.com/alizaynoune/Red-Tetris/blob/main/images/soloPlayer.png?raw=true)
 
 ## MultiPlayer
-![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/multiplayer.png?raw=true)
+![multi-player](https://github.com/alizaynoune/Red-Tetris/blob/main/images/multiplayer.png?raw=true)
 
 ## Game Winner
-![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/gameWinner.png?raw=true)
+![game-winner](https://github.com/alizaynoune/Red-Tetris/blob/main/images/gameWinner.png?raw=true)
 
 ## Game Over
-![Homet](https://github.com/alizaynoune/Red-Tetris/blob/main/images/gameOver.png?raw=true)
+![game-over](https://github.com/alizaynoune/Red-Tetris/blob/main/images/gameOver.png?raw=true)
